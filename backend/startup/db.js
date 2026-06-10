@@ -20,4 +20,8 @@ export default async function connectToDb() {
     }
 }
 
+pool.on('error', (err) => {
+  console.log('pool error:', err.message);
+});
+
 export { pool };
