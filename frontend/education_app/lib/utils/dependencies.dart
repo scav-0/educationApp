@@ -7,6 +7,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 class AuthController extends GetxController {
   final storage = FlutterSecureStorage();
   final signInUrl = Uri.parse('$baseUrl/api/users/sign-in');
+  final signOutUrl = Uri.parse('$baseUrl/api/users/sign-out');
 
   @override
   void onInit() {
@@ -28,6 +29,8 @@ class AuthController extends GetxController {
   RxBool isSignedIn = false.obs;
   RxString token = ''.obs;
   RxString signedInUsername = ''.obs;
+  RxString signedInFirstName= ''.obs;
+  RxString signedInLastName = ''.obs;
 
   Future<String> signIn(String username, String password) async {
     try {
@@ -45,12 +48,27 @@ class AuthController extends GetxController {
         isSignedIn.value = true;
         token.value = jsonSignInData['token'];
         signedInUsername.value = jsonSignInData['username'];
+        signedInFirstName.value = jsonSignInData['first_name'];
+        signedInLastName.value = jsonSignInData['last_name'];
         await storage.write(key: 'token', value: jsonSignInData['token']); //save the token in flutter for saving state
         return 'success';
       } else {
-        return signInData.body.toString();
+        return jsonDecode(signInData.body)['message'].toString();
       }
     } catch (error) {
+      return '$error';
+    }
+  }
+
+  Future<String> signOut() async {
+    try{
+        isSignedIn.value = false;
+        token.value = '';
+        signedInUsername.value = '';
+        await storage.deleteAll();
+        return 'success';
+      
+    }catch(error){
       return '$error';
     }
   }

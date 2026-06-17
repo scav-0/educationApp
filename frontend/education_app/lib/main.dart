@@ -1,7 +1,6 @@
 import 'package:education_app/pages/auth_page.dart';
 import 'package:education_app/utils/dependencies.dart';
 import 'package:flutter/material.dart';
-import 'pages/login_page.dart';
 import 'package:get/get.dart';
 
 void main() {
@@ -18,6 +17,11 @@ class MyApp extends StatelessWidget {
     return  GetMaterialApp(
       debugShowCheckedModeBanner: false,
       home: AuthPage(),
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        scaffoldBackgroundColor: Colors.amber[100],
+        
+      ),
     );
   }
 }

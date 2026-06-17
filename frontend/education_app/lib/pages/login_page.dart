@@ -1,6 +1,5 @@
 import 'package:education_app/components/button.dart';
 import 'package:education_app/components/text_field.dart';
-import 'package:education_app/pages/home_page.dart';
 import 'package:education_app/utils/dependencies.dart';
 import 'package:education_app/utils/screen_size.dart';
 import 'package:flutter/material.dart';
@@ -21,10 +20,9 @@ class LoginPage extends StatelessWidget {
     passwordController.text.trim(),
   );
 
-    print(result); // ← check what's coming back
 
     if (result == 'success') {
-    authController.isSignedIn.value = true; // ← this triggers AuthPage to switch to HomePage
+    authController.isSignedIn.value = true; 
     } else {
       Get.snackbar('Error', result, snackPosition: SnackPosition.BOTTOM,);
     
