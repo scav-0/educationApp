@@ -1,18 +1,11 @@
-import pg from 'pg';
+import dotenv from 'dotenv';
+dotenv.config();
 
-const { Pool } = pg;
+console.log("RAW DATABASE_URL:");
+console.log(process.env.DATABASE_URL);
 
-const pool = new Pool({
-  host: 'localhost',
-  port: 5432,
-  database: 'education_app',
-  user: 'postgres',
-  password: '123Tibby',
-});
+console.log("TYPE:");
+console.log(typeof process.env.DATABASE_URL);
 
-pool.connect()
-  .then(client => {
-    console.log('connected!');
-    client.release();
-  })
-  .catch(err => console.log('error:', err.message));
+console.log("LENGTH:");
+console.log(process.env.DATABASE_URL?.length);

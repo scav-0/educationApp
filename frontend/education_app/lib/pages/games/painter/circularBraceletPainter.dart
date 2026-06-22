@@ -16,11 +16,22 @@ class  CircularBraceletPainter extends CustomPainter {
     final n = beadColors.length;//Number of beads
     final center = Offset(size.width / 2, size.height/2);
     //Find Radius of big circle - size.shortest side gives you larger of width and height
-    final bigRadius = (size.shortestSide/2) - beadRadius - offset;
+    // final bigRadius = (size.shortestSide/2) - beadRadius - offset;
+
+    //OVAL ATTEMPT
+    final radiusX = (size.width / 2) - beadRadius - offset;
+    final radiusY = radiusX*0.75;
 
     //draw potential cord (and check it works ahahaha)
     final cordPaint = Paint()..color = Colors.brown..strokeWidth=3..style=PaintingStyle.stroke;
-    canvas.drawCircle(center, bigRadius, cordPaint);
+    // canvas.drawCircle(center, bigRadius, cordPaint);
+
+    final ovalRect = Rect.fromCenter(
+      center: center,
+      width: radiusX * 2,
+      height: radiusY * 2,
+    );
+    canvas.drawOval(ovalRect, cordPaint);
 
     // draw beads
     int direction;
@@ -34,11 +45,15 @@ class  CircularBraceletPainter extends CustomPainter {
 
       final theta = (pi/2)+((direction*2*i*pi)/n);
       
-      //x co-ord = center x + Rcos(theta)
-      final beadX = center.dx + (bigRadius*cos(theta));
-      //y co-ord = center y + Rsin theta
-      final beadY = center.dy + (bigRadius*sin(theta));
+      // Use radiusX for x, radiusY for y instead of one shared bigRadius
+      final beadX = center.dx + (radiusX * cos(theta));
+      final beadY = center.dy + (radiusY * sin(theta));
       final beadCenter = Offset(beadX, beadY);
+      // //x co-ord = center x + Rcos(theta)
+      // final beadX = center.dx + (bigRadius*cos(theta));
+      // //y co-ord = center y + Rsin theta
+      // final beadY = center.dy + (bigRadius*sin(theta));
+      // final beadCenter = Offset(beadX, beadY);
 
 
       int index = (randomNo+i)%n;

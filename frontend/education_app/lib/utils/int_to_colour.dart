@@ -17,7 +17,7 @@ List<Color> toBeadColours(List<int> colours){
     }).toList();
   }
 
-  final double beadRadius = 14;
+  final double beadRadius = 16;
 
   List<List<int>> createWrongAnswers(List<int> colours){
     List<List<int>> list = [] ;

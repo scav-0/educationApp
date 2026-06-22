@@ -3,11 +3,11 @@ import 'dart:math';
 import 'package:education_app/components/multipleChoice.dart';
 import 'package:education_app/pages/games/painter/circularBraceletPainter.dart';
 import 'package:education_app/components/my_bottom_nav.dart';
+import 'package:education_app/pages/games/painter/lineBraceletPainter.dart';
 import 'package:education_app/utils/int_to_colour.dart';
 import 'package:flutter/material.dart';
 
 class BraceletGamePage extends StatefulWidget {
-
   const BraceletGamePage({super.key});
 
   //DIFFICULTY WILL BE THE LENGTH OF THE BRACELET/ maybe less colours too?
@@ -17,7 +17,7 @@ class BraceletGamePage extends StatefulWidget {
 }
 
 class BraceletGamePageState extends State<BraceletGamePage> {
-  final List<int> beadColors = [1, 2, 3, 4, 5, 6];
+  late List<int> beadColors;
 
   late List<List<int>> options;
   late int correctPosition;
@@ -28,18 +28,33 @@ class BraceletGamePageState extends State<BraceletGamePage> {
     generateQuestion();
   }
 
+  Widget displayOptions(int index){
+    return CustomPaint(painter: LineBraceletPainter(beadColors: options[index]));
+  }
+
+  int questionNumber = 0;
+
   void generateQuestion() {
-    List<List<int>> wrongAnswers = createWrongAnswers(beadColors);
+    setState(() {
+      questionNumber++;
+      beadColors = [];
+      final rng = Random();
+      for (int i = 0; i < rng.nextInt(7) + 5; i++) {
+        beadColors.add(rng.nextInt(7) + 1);
+      }
 
-    List<int> positions = [0, 1, 2, 3];
-    positions.shuffle();
-    correctPosition = positions[0];
+      List<List<int>> wrongAnswers = createWrongAnswers(beadColors);
 
-    options = [[], [], [], []];
-    options[positions[0]] = beadColors;
-    options[positions[1]] = wrongAnswers[0];
-    options[positions[2]] = wrongAnswers[1];
-    options[positions[3]] = wrongAnswers[2];
+      List<int> positions = [0, 1, 2, 3];
+      positions.shuffle();
+      correctPosition = positions[0];
+
+      options = [[], [], [], []];
+      options[positions[0]] = beadColors;
+      options[positions[1]] = wrongAnswers[0];
+      options[positions[2]] = wrongAnswers[1];
+      options[positions[3]] = wrongAnswers[2];
+    });
   }
 
   void onResult(bool correct) {
@@ -52,7 +67,7 @@ class BraceletGamePageState extends State<BraceletGamePage> {
             onPressed: () {
               Navigator.pop(context);
               setState(() {
-                generateQuestion(); // load next question
+                generateQuestion(); // should load next question....
               });
             },
             child: const Text('Next'),
@@ -61,35 +76,42 @@ class BraceletGamePageState extends State<BraceletGamePage> {
       ),
     );
   }
+  
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       bottomNavigationBar: const MyBottomNavBar(),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Question bracelet
-            SizedBox(
-              width: 200,
-              height: 200,
-              child: CustomPaint(
-                painter: CircularBraceletPainter(
-                  beadColors: beadColors,
-                  randomNo: Random().nextInt(beadColors.length))
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Question bracelet
+              SizedBox(height:25,child: Text("Question goes here?!")),
+              SizedBox(
+                width: 180,
+                height: 180,
+                child: CustomPaint(
+                  painter: CircularBraceletPainter(
+                    beadColors: beadColors,
+                    randomNo: Random().nextInt(beadColors.length),
+                  ),
                 ),
               ),
-            
-
-            const SizedBox(height: 24),
-
-            // Multiple choice options
-            MultipleChoice(
-              options: options,
-              onResult: onResult, correctPostion: correctPosition,
-            ),
-          ],
+          
+              Text("Which Bracelet is the same?"),
+              const SizedBox(height: 24),
+          
+              // Multiple choice options
+              MultipleChoice(
+                key: ValueKey(questionNumber),
+                displayOptions: displayOptions,
+                onResult: onResult,
+                correctPostion: correctPosition,
+              ),
+            ],
+          ),
         ),
       ),
     );

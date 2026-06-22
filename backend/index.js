@@ -1,11 +1,11 @@
 import express from 'express';
-import dotenv from 'dotenv';
+// import dotenv from 'dotenv';
 import db from './startup/db.js';
 import studentRoutes from './routes/studentRoutes.js';
 import cors from 'cors';
 
 
-dotenv.config();
+// dotenv.config();
 const app = express();
 app.use(cors({
   origin: '*', // allow all origins for development

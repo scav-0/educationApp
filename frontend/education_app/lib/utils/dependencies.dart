@@ -16,20 +16,21 @@ class AuthController extends GetxController {
   }
 
   void _checkAuthStatus() async {
-    
-    final savedToken = await storage.read(
-      key: 'token',
-    ); 
+    final savedToken = await storage.read(key: 'token');
     if (savedToken != null) {
       token.value = savedToken;
       isSignedIn.value = true;
+
+      signedInUsername.value = await storage.read(key: 'username') ?? '';
+      signedInFirstName.value = await storage.read(key: 'first_name') ?? '';
+      signedInLastName.value = await storage.read(key: 'last_name') ?? '';
     }
   }
 
   RxBool isSignedIn = false.obs;
   RxString token = ''.obs;
   RxString signedInUsername = ''.obs;
-  RxString signedInFirstName= ''.obs;
+  RxString signedInFirstName = ''.obs;
   RxString signedInLastName = ''.obs;
 
   Future<String> signIn(String username, String password) async {
@@ -45,12 +46,25 @@ class AuthController extends GetxController {
       //when api responds -> if succesfull sends status code of 200
       if (signInData.statusCode == 200) {
         final jsonSignInData = jsonDecode(signInData.body);
+
         isSignedIn.value = true;
         token.value = jsonSignInData['token'];
         signedInUsername.value = jsonSignInData['username'];
         signedInFirstName.value = jsonSignInData['first_name'];
         signedInLastName.value = jsonSignInData['last_name'];
-        await storage.write(key: 'token', value: jsonSignInData['token']); //save the token in flutter for saving state
+        await storage.write(
+          key: 'token',
+          value: jsonSignInData['token'],
+        ); //save the token in flutter for saving state
+        await storage.write(key: 'username', value: jsonSignInData['username']);
+        await storage.write(
+          key: 'first_name',
+          value: jsonSignInData['first_name'],
+        );
+        await storage.write(
+          key: 'last_name',
+          value: jsonSignInData['last_name'],
+        );
         return 'success';
       } else {
         return jsonDecode(signInData.body)['message'].toString();
@@ -61,14 +75,13 @@ class AuthController extends GetxController {
   }
 
   Future<String> signOut() async {
-    try{
-        isSignedIn.value = false;
-        token.value = '';
-        signedInUsername.value = '';
-        await storage.deleteAll();
-        return 'success';
-      
-    }catch(error){
+    try {
+      isSignedIn.value = false;
+      token.value = '';
+      signedInUsername.value = '';
+      await storage.deleteAll();
+      return 'success';
+    } catch (error) {
       return '$error';
     }
   }
