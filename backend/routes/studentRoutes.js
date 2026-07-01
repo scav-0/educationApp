@@ -36,12 +36,14 @@ router.post('/sign-in', async (req, res) => {
         );
 
         //Send back the token and the username and first and last name
-        res.json({ token, username: student.username,first_name: student.first_name, last_name: student.last_name });
+        res.json({ token, id: student.id, username: student.username,first_name: student.first_name, last_name: student.last_name });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 
 });
+
+
 
 //Don't need a sign out post
 

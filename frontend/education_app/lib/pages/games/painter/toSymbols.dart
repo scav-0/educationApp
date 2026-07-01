@@ -6,8 +6,13 @@ const List<IconData> symbolIcons = [
   Icons.diamond,
   Icons.square,
   Icons.hexagon,
-  Icons.bolt,
-  Icons.cloud,
+  // Icons.bolt,
+  // Icons.cloud,
+  // Icons.arrow_back,
+  // Icons.punch_clock,
+  // Icons.person,
+  Icons.pentagon,
+  // Icons.back_hand_rounded
 ];
 
 const List<Color> symbolColors = [
@@ -32,6 +37,7 @@ List<Widget> buildSymbolRow(String word) {
     }
     int index = charToIndex[char]!;
     symbols.add(
+      //since icons length is 7 and colours is 8 when it loops back it should be a different colour? 
       Icon(
         symbolIcons[index % symbolIcons.length],
         color: symbolColors[index % symbolColors.length],

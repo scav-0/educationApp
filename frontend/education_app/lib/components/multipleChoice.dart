@@ -78,6 +78,7 @@ class MultipleChoiceState extends State<MultipleChoice> {
               ),
               child: SizedBox(
                 height: 36,
+                width: 200,
                 child: widget.displayOptions(
                   i,
                 ), //this is the main line that needs to

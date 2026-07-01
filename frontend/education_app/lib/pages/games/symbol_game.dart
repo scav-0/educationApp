@@ -5,8 +5,10 @@ import 'dart:math';
 import 'package:education_app/components/multipleChoice.dart';
 import 'package:education_app/components/my_bottom_nav.dart';
 import 'package:education_app/pages/games/painter/toSymbols.dart';
+import 'package:education_app/utils/skill_controller.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get_connect/http/src/utils/utils.dart';
+import 'package:get/get.dart';
+
 
 class SymbolGamePage extends StatefulWidget {
   const SymbolGamePage({super.key});
@@ -16,6 +18,10 @@ class SymbolGamePage extends StatefulWidget {
 }
 
 class SymbolGamePageState extends State<SymbolGamePage> {
+  //DIFFICULTY EFFECTS WRONG ANSWER GENERATION (MORE RANDOM LETTERS)
+  //ALSO EFFECTS LENGTH OF WORD
+  
+  final SkillController skillController = Get.find<SkillController>();
   late String answer;
 
   late List<String> options;
@@ -31,11 +37,7 @@ class SymbolGamePageState extends State<SymbolGamePage> {
     return Text(
       options[index],
       textAlign: TextAlign.center,
-      style: const TextStyle(
-        fontSize: 24,
-        
-        letterSpacing: 4, 
-      ),
+      style: const TextStyle(fontSize: 24, letterSpacing: 4),
     );
   }
 
@@ -44,16 +46,14 @@ class SymbolGamePageState extends State<SymbolGamePage> {
   void generateQuestion() {
     setState(() {
       questionNumber++;
-      answer = "";
-      final rng = Random();
-      final wordsItCouldBe = ["TOOT", "WORD", "BRRR", "PINACOLADA"];
-      // //Create random bead Colors array -> to be replaced
-      // for (int i = 0; i < rng.nextInt(7) + 5; i++) {
-      //   beadColors.add(rng.nextInt(7) + 1);
-      // }
-      answer = wordsItCouldBe[rng.nextInt(3)];
 
-      List<String> wrongAnswers = createWrongAnswers(answer);
+      double pKnown = skillController.symbolPknow.value;
+
+      print(pKnown);
+      print("New Game \n");
+      answer = wordGenerator(pKnown);
+
+      List<String> wrongAnswers = createWrongAnswers(answer, pKnown);
 
       List<int> positions = [0, 1, 2, 3];
       positions.shuffle();
@@ -67,15 +67,48 @@ class SymbolGamePageState extends State<SymbolGamePage> {
     });
   }
 
-  void onResult(bool correct) {
+  //p <1 -> can be changed later assuming Bayesian Knowledge Tracing
+  String wordGenerator(double p) {
+    final rng = Random();
+
+    String word = "";
+
+    int wordLength = 4;
+
+    //loop -> if (p>i/10) -> wordLength = i+1 where i--, i starts at 9 -> ends on 1 so if p>0.9 -> word length=10, >0.8 =9, etc etc.
+
+    for (int i = 9; i > 0; i--) {
+      if (p > i / 10) {
+        wordLength = i + 4;
+        break;
+      }
+    }
+
+    while (word.length != wordLength) {
+      if (word.isNotEmpty && rng.nextDouble() < 0.4) {
+        word +=
+            word[rng.nextInt(word.length)]; //40% chance of a repeast
+      } else {
+        word += String.fromCharCode(65 + rng.nextInt(26));
+      }
+    }
+
+    //add a check for swear words as it is a kids game
+
+    return word;
+  }
+
+  void  onResult(bool correct) {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
         title: Text(correct ? 'Correct!' : 'Wrong!'),
         actions: [
           TextButton(
-            onPressed: () {
+            onPressed: () async {
+              await skillController.updateSkill('symbol', correct);
               Navigator.pop(context);
+              
               setState(() {
                 generateQuestion(); // should load next question....
               });
@@ -105,25 +138,55 @@ class SymbolGamePageState extends State<SymbolGamePage> {
     return pattern;
   }
 
-  List<String> createWrongAnswers(String input) {
+  List<String> createWrongAnswers(String input, double p) {
     String correctPattern = getPattern(input);
     Random rng = Random();
     List<String> wrongAnswers = [];
     List<String> patterns = [correctPattern];
     //One where a new symbol is added
+
+    bool breakCon;
+
+    int randoms = 1;
+
+    //change this such that once length is upped, you get some with more -> less
+
+
+    if (p%0.1 <0.025) {
+      randoms = 4;
+    } else if (p%0.1 <0.05) {
+      randoms = 3;
+    } else if (p%0.1 <0.075) {
+      randoms = 2;
+    }
+
+    randoms = randoms.clamp(1, input.length);
+
     do {
       List<String> chars = input.split("");
+      List<int> changed = [];
+      for (int i = 0; i < randoms; i++) {
+        int index;
+        do {
+          index = rng.nextInt(input.length);
+        } while (changed.contains(index));
+        changed.add(index);
+        chars[index] = String.fromCharCode(rng.nextInt(25) + 65);
+      }
 
-      chars[rng.nextInt(input.length)] = String.fromCharCode(
-        rng.nextInt(25) + 65,
-      );
       String potential = chars.join();
       String popattern = getPattern(potential);
       if (!patterns.contains(popattern)) {
         wrongAnswers.add(potential);
         patterns.add(popattern);
       }
-    } while (wrongAnswers.isEmpty);
+
+      if (p < 0.5) {
+        breakCon = wrongAnswers.length < 2;
+      } else {
+        breakCon = wrongAnswers.isEmpty;
+      }
+    } while (breakCon);
 
     //two where the existing ones are jumbled
     int attempts = 0;
@@ -175,7 +238,6 @@ class SymbolGamePageState extends State<SymbolGamePage> {
               // Question bracelet
               SizedBox(height: 25, child: Text("Question goes here?!")),
               SizedBox(
-                
                 height: 180,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,

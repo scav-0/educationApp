@@ -2,8 +2,8 @@ import express from 'express';
 // import dotenv from 'dotenv';
 import db from './startup/db.js';
 import studentRoutes from './routes/studentRoutes.js';
+import skillRoutes from './routes/skillRoutes.js';
 import cors from 'cors';
-
 
 // dotenv.config();
 const app = express();
@@ -14,7 +14,10 @@ app.use(cors({
 }));
 app.use(express.json()); 
 
-app.use('/api/users', studentRoutes);
+
+//routes go here!
+app.use('/api/students', studentRoutes);
+app.use('/api/skills', skillRoutes);
 
 const port = process.env.PORT || 3000;
 

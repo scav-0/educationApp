@@ -1,11 +1,17 @@
-import dotenv from 'dotenv';
-dotenv.config();
+import PKnownNext from "./utils/bayesian.js";
 
-console.log("RAW DATABASE_URL:");
-console.log(process.env.DATABASE_URL);
 
-console.log("TYPE:");
-console.log(typeof process.env.DATABASE_URL);
-
-console.log("LENGTH:");
-console.log(process.env.DATABASE_URL?.length);
+/**
+ * Testing the knowledge tracing for different values for the probabilities
+ */
+let pKnown =0.01;
+let i=2;
+while(pKnown<=0.95){
+    let correct = true;
+    if(i%3==0){
+        correct=false;
+    }
+    pKnown = PKnownNext(pKnown, 0.01, 0.25, 0.1, correct);
+    console.log(pKnown);
+    i++;
+}

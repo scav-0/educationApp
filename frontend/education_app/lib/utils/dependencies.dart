@@ -6,24 +6,28 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class AuthController extends GetxController {
   final storage = FlutterSecureStorage();
-  final signInUrl = Uri.parse('$baseUrl/api/users/sign-in');
-  final signOutUrl = Uri.parse('$baseUrl/api/users/sign-out');
+  final signInUrl = Uri.parse('$baseUrl/api/students/sign-in');
+  final signOutUrl = Uri.parse('$baseUrl/api/students/sign-out');
 
   @override
   void onInit() {
     super.onInit();
-    _checkAuthStatus();
+    checkAuthStatus();
   }
 
-  void _checkAuthStatus() async {
+  Future<void> checkAuthStatus() async {
     final savedToken = await storage.read(key: 'token');
     if (savedToken != null) {
       token.value = savedToken;
       isSignedIn.value = true;
 
+      final idString = await storage.read(key: 'id') ?? '0';//needs to be parsed since it returns a string!
+      signedInId.value = int.parse(idString);
       signedInUsername.value = await storage.read(key: 'username') ?? '';
       signedInFirstName.value = await storage.read(key: 'first_name') ?? '';
       signedInLastName.value = await storage.read(key: 'last_name') ?? '';
+    }else{
+      isSignedIn.value=false;
     }
   }
 
@@ -32,6 +36,7 @@ class AuthController extends GetxController {
   RxString signedInUsername = ''.obs;
   RxString signedInFirstName = ''.obs;
   RxString signedInLastName = ''.obs;
+  RxInt signedInId = 0.obs;
 
   Future<String> signIn(String username, String password) async {
     try {
@@ -49,13 +54,13 @@ class AuthController extends GetxController {
 
         isSignedIn.value = true;
         token.value = jsonSignInData['token'];
+        signedInId.value = jsonSignInData['id'];
         signedInUsername.value = jsonSignInData['username'];
         signedInFirstName.value = jsonSignInData['first_name'];
         signedInLastName.value = jsonSignInData['last_name'];
-        await storage.write(
-          key: 'token',
-          value: jsonSignInData['token'],
-        ); //save the token in flutter for saving state
+        await storage.write(key: 'token', value: jsonSignInData['token']);
+
+        await storage.write(key: 'id', value: jsonSignInData['id'].toString());
         await storage.write(key: 'username', value: jsonSignInData['username']);
         await storage.write(
           key: 'first_name',

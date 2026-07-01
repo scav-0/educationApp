@@ -39,6 +39,8 @@ class BraceletGamePageState extends State<BraceletGamePage> {
       questionNumber++;
       beadColors = [];
       final rng = Random();
+
+      //Create random bead Colors array -> to be replaced
       for (int i = 0; i < rng.nextInt(7) + 5; i++) {
         beadColors.add(rng.nextInt(7) + 1);
       }
