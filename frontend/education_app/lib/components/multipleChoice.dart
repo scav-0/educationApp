@@ -74,7 +74,7 @@ class MultipleChoiceState extends State<MultipleChoice> {
                 borderRadius: BorderRadius.circular(12),
                 color: selectedIndex == i
                     ? Colors.lightBlue.shade100
-                    : Colors.transparent,
+                    : Colors.white,
               ),
               child: SizedBox(
                 height: 36,

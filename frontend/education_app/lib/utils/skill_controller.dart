@@ -20,9 +20,11 @@ class SkillController extends GetxController {
 
   Future<void> fetchSkills() async {
     try {
+      // print("Fetching Skills");
       if (authController.token.value.isEmpty) {
         await authController.checkAuthStatus();
       }
+
       final response = await http.get(
         Uri.parse('$baseUrl/api/skills/${authController.signedInId.value}'),
         headers: {
@@ -34,6 +36,8 @@ class SkillController extends GetxController {
         final data = jsonDecode(response.body);
         braceletPknow.value = data['bracelet'];
         symbolPknow.value = data['symbol'];
+      }else{
+        // print(response.statusCode);
       }
     } catch (e) {
       print('Error fetching skills: $e');
@@ -43,7 +47,7 @@ class SkillController extends GetxController {
   Future<void> updateSkill(String game, bool correct) async {
     //Need to send game, and if its is correct or not alongside student id, (maybe current pknow also)
     try {
-      print("Updating skills");
+      // print("Updating skills");
       final response = await http.post(
         Uri.parse('$baseUrl/api/skills/update'),
         headers: {
@@ -55,7 +59,7 @@ class SkillController extends GetxController {
       );
 
       if (response.statusCode == 200) {
-        print("Success!");
+        // print("Success!");
         final data = jsonDecode(response.body);
 
         //Then receive back the new pknow
@@ -69,10 +73,31 @@ class SkillController extends GetxController {
           //UPDATE WHEN A NEW GAME IS ADDED
         }
       }else{
-          print(response.statusCode);
+          // print(response.statusCode);
         }
     } catch (e) {
       print('Error updating skill: $e');
     }
   }
+
+  Future<void> saveStats(String game, bool correct, int attempts, int timeTaken, double pKnow) async {
+  try {
+    await http.post(
+      Uri.parse('$baseUrl/api/skills/stats'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ${authController.token.value}',
+      },
+      body: jsonEncode({
+        'game': game,
+        'correct': correct,
+        'attempts': attempts,
+        'time_taken': timeTaken,
+        'p_know': pKnow,
+      }),
+    );
+  } catch (e) {
+    print('Error saving stats: $e');
+  }
+}
 }

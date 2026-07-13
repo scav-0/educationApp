@@ -12,6 +12,7 @@ const defaultPknow = 0.3;
 
 router.get('/:studentId', authenticateToken, async (req, res) => {
     try {
+        
         const { studentId } = req.params;
 
         
@@ -120,5 +121,20 @@ router.post('/update', authenticateToken, async (req, res) => {
 
 }
 );
+
+router.post('/stats', authenticateToken, async (req, res) => {
+  try {
+    const { game, correct, attempts, time_taken, p_know } = req.body;
+    await pool.query(
+      `INSERT INTO game_stats (student_id, game, correct, attempts, time_taken, p_know)
+       VALUES ($1, $2, $3, $4, $5, $6)`,
+      [req.user, game, correct, attempts, time_taken, p_know]
+    );
+    res.status(200).json({ message: 'Stats saved' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 
 export default router;

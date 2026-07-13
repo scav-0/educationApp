@@ -4,11 +4,11 @@ import 'dart:math';
 
 import 'package:education_app/components/multipleChoice.dart';
 import 'package:education_app/components/my_bottom_nav.dart';
+import 'package:education_app/data/badWordFilter.dart';
 import 'package:education_app/pages/games/painter/toSymbols.dart';
 import 'package:education_app/utils/skill_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 
 class SymbolGamePage extends StatefulWidget {
   const SymbolGamePage({super.key});
@@ -20,17 +20,21 @@ class SymbolGamePage extends StatefulWidget {
 class SymbolGamePageState extends State<SymbolGamePage> {
   //DIFFICULTY EFFECTS WRONG ANSWER GENERATION (MORE RANDOM LETTERS)
   //ALSO EFFECTS LENGTH OF WORD
-  
+
   final SkillController skillController = Get.find<SkillController>();
   late String answer;
-
+  bool isLoading = true;
   late List<String> options;
   late int correctPosition;
+  int attemptCount = 0;
+  late DateTime questionStartTime;
+  late bool firstAttempt;
+
   //This one is going to work like pattern array, create 3 "wrong answers" i.e different patterns, map to icons, same multiple choice questions
   @override
   void initState() {
     super.initState();
-    generateQuestion();
+    loadAndGenerate();
   }
 
   Widget displayOptions(int index) {
@@ -43,14 +47,25 @@ class SymbolGamePageState extends State<SymbolGamePage> {
 
   int questionNumber = 0;
 
+  Future<void> loadAndGenerate() async {
+    await skillController.fetchSkills();
+    generateQuestion();
+    setState(() {
+      isLoading = false; // done loading
+      attemptCount = 1;
+      questionStartTime = DateTime.now();
+      firstAttempt = true;
+    });
+  }
+
   void generateQuestion() {
     setState(() {
       questionNumber++;
 
       double pKnown = skillController.symbolPknow.value;
 
-      print(pKnown);
-      print("New Game \n");
+      // print(pKnown);
+      // print("New Game \n");
       answer = wordGenerator(pKnown);
 
       List<String> wrongAnswers = createWrongAnswers(answer, pKnown);
@@ -70,47 +85,77 @@ class SymbolGamePageState extends State<SymbolGamePage> {
   //p <1 -> can be changed later assuming Bayesian Knowledge Tracing
   String wordGenerator(double p) {
     final rng = Random();
-
     String word = "";
+    do {
+      word = "";
 
-    int wordLength = 4;
+      int wordLength = 4;
 
-    //loop -> if (p>i/10) -> wordLength = i+1 where i--, i starts at 9 -> ends on 1 so if p>0.9 -> word length=10, >0.8 =9, etc etc.
+      //loop -> if (p>i/10) -> wordLength = i+1 where i--, i starts at 9 -> ends on 1 so if p>0.9 -> word length=10, >0.8 =9, etc etc.
 
-    for (int i = 9; i > 0; i--) {
-      if (p > i / 10) {
-        wordLength = i + 4;
-        break;
+      for (int i = 9; i > 0; i--) {
+        if (p > i / 10) {
+          wordLength = i + 4;
+          break;
+        }
       }
-    }
 
-    while (word.length != wordLength) {
-      if (word.isNotEmpty && rng.nextDouble() < 0.4) {
-        word +=
-            word[rng.nextInt(word.length)]; //40% chance of a repeast
-      } else {
-        word += String.fromCharCode(65 + rng.nextInt(26));
+      while (word.length != wordLength) {
+        if (word.isNotEmpty && rng.nextDouble() < 0.4) {
+          word += word[rng.nextInt(word.length)]; //40% chance of a repeast
+        } else {
+          word += String.fromCharCode(65 + rng.nextInt(26));
+        }
       }
-    }
+    } while (containsProfanity(word));
 
     //add a check for swear words as it is a kids game
 
     return word;
   }
 
-  void  onResult(bool correct) {
+  bool containsProfanity(String text) {
+    final lower = text.toLowerCase();
+
+    return badWords.any((word) => lower.contains(word));
+  }
+
+  void onResult(bool correct) {
+    final timeTaken = DateTime.now().difference(questionStartTime).inSeconds;
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: Text(correct ? 'Correct!' : 'Wrong!'),
+        title: Text(correct ? 'Correct!' : 'Not quite there..'),
         actions: [
+          if (!correct)
+            TextButton(
+              onPressed: () {
+                attemptCount++;
+                Navigator.pop(context);
+                //Retry question,
+              },
+              child: const Text('Try Again'),
+            ),
           TextButton(
             onPressed: () async {
-              await skillController.updateSkill('symbol', correct);
+              final pKnow = skillController.symbolPknow.value;
+
+              if (firstAttempt) {
+                firstAttempt = false;
+                await skillController.updateSkill('symbol', correct);
+              }
+
+              await skillController.saveStats(
+                'symbol',
+                correct,
+                attemptCount,
+                timeTaken,
+                pKnow,
+              );
               Navigator.pop(context);
-              
+
               setState(() {
-                generateQuestion(); // should load next question....
+                loadAndGenerate(); // should load next question....
               });
             },
             child: const Text('Next'),
@@ -151,12 +196,11 @@ class SymbolGamePageState extends State<SymbolGamePage> {
 
     //change this such that once length is upped, you get some with more -> less
 
-
-    if (p%0.1 <0.025) {
+    if (p % 0.1 < 0.025) {
       randoms = 4;
-    } else if (p%0.1 <0.05) {
+    } else if (p % 0.1 < 0.05) {
       randoms = 3;
-    } else if (p%0.1 <0.075) {
+    } else if (p % 0.1 < 0.075) {
       randoms = 2;
     }
 
@@ -176,7 +220,8 @@ class SymbolGamePageState extends State<SymbolGamePage> {
 
       String potential = chars.join();
       String popattern = getPattern(potential);
-      if (!patterns.contains(popattern)) {
+
+      if (!containsProfanity(potential) && !patterns.contains(popattern)) {
         wrongAnswers.add(potential);
         patterns.add(popattern);
       }
@@ -203,7 +248,7 @@ class SymbolGamePageState extends State<SymbolGamePage> {
 
       String potential = chars.join();
       String popattern = getPattern(potential);
-      if (!patterns.contains(popattern)) {
+      if (!containsProfanity(potential) && !patterns.contains(popattern)) {
         wrongAnswers.add(potential);
         patterns.add(popattern);
       }
@@ -217,7 +262,7 @@ class SymbolGamePageState extends State<SymbolGamePage> {
       }
       String potential = chars.join();
       String popattern = getPattern(potential);
-      if (!patterns.contains(popattern)) {
+      if (!containsProfanity(potential) && !patterns.contains(popattern)) {
         wrongAnswers.add(potential);
         patterns.add(popattern);
       }
@@ -228,34 +273,61 @@ class SymbolGamePageState extends State<SymbolGamePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      bottomNavigationBar: const MyBottomNavBar(),
-      body: Center(
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Question bracelet
-              SizedBox(height: 25, child: Text("Question goes here?!")),
-              SizedBox(
-                height: 180,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: buildSymbolRow(answer),
-                ),
-              ),
+    if (isLoading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
 
-              Text("What is the password?"),
-              const SizedBox(height: 24),
+    return Container(
+      decoration: BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage('assets/images/clouds1.jpg'),
+          repeat: ImageRepeat.repeat, // tiles in both directions
+          // repeat: ImageRepeat.repeatX, // tiles horizontally only
+          // repeat: ImageRepeat.repeatY, // tiles vertically only
+        ),
+      ),
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        bottomNavigationBar: const MyBottomNavBar(),
+        body: Center(
+          child: SingleChildScrollView(
+            child: Container(
+              // decoration: BoxDecoration(color: Colors.white),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Question ds
+                  SizedBox(height: 25),
+                  IntrinsicWidth(
+                    child: Container(
+                      height: 100,
+                      
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.grey, width: 2),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: buildSymbolRow(answer),
+                      ),
+                    ),
+                  ),
 
-              // Multiple choice options
-              MultipleChoice(
-                key: ValueKey(questionNumber),
-                displayOptions: displayOptions,
-                onResult: onResult,
-                correctPostion: correctPosition,
+                  Text("What is the password?"),
+                  const SizedBox(height: 24),
+
+                  // Multiple choice options
+                  MultipleChoice(
+                    key: ValueKey(questionNumber),
+                    displayOptions: displayOptions,
+                    onResult: onResult,
+                    correctPostion: correctPosition,
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),
