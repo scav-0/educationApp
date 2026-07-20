@@ -44,7 +44,7 @@ class MultipleChoiceState extends State<MultipleChoice> {
       return selectedIndex == index
           ? Colors.blue
           : Colors
-                .grey; //First is the widget selected? if yes make it blue, else gret
+                .grey; //First is the widget selected? if yes make it blue, else grey
     }
     if (index == widget.correctPostion) return Colors.green;
     if (index == selectedIndex) return Colors.red;
@@ -81,7 +81,7 @@ class MultipleChoiceState extends State<MultipleChoice> {
                 width: 200,
                 child: widget.displayOptions(
                   i,
-                ), //this is the main line that needs to
+                ), 
               ),
             ),
           ),

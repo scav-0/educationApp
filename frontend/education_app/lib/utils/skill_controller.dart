@@ -10,6 +10,7 @@ class SkillController extends GetxController {
 
   RxDouble braceletPknow = 0.0.obs;
   RxDouble symbolPknow = 0.0.obs;
+  RxDouble honeycombPknow = 0.0.obs;
 
   @override
   void onInit() {
@@ -36,6 +37,7 @@ class SkillController extends GetxController {
         final data = jsonDecode(response.body);
         braceletPknow.value = data['bracelet'];
         symbolPknow.value = data['symbol'];
+        honeycombPknow.value = data['honeycomb'];
       }else{
         // print(response.statusCode);
       }
@@ -69,6 +71,9 @@ class SkillController extends GetxController {
             break;
           case 'symbol':
             symbolPknow.value = data['p_know'];
+            break;
+          case 'honeycomb':
+            honeycombPknow.value = data['p_know'];
             break;
           //UPDATE WHEN A NEW GAME IS ADDED
         }

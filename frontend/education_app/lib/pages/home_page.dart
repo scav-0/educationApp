@@ -1,8 +1,9 @@
 import 'package:education_app/pages/games/bracelet_game.dart';
 import 'package:education_app/components/my_bottom_nav.dart';
+import 'package:education_app/pages/games/hex_game.dart';
 import 'package:education_app/pages/games/symbol_game.dart';
 import 'package:education_app/utils/dependencies.dart';
-import 'package:education_app/utils/game_cards.dart';
+import 'package:education_app/components/game_cards.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -19,7 +20,9 @@ class HomePage extends StatelessWidget {
     Get.to(() => SymbolGamePage());
   }
 
-  void game3() {}
+  void game3() {
+    Get.to(() => HexGamePage());
+  }
 
   void game4() {}
 
