@@ -1,24 +1,25 @@
 import 'package:education_app/components/button.dart';
 import 'package:education_app/components/text_field.dart';
+import 'package:education_app/pages/login_page.dart';
 import 'package:education_app/pages/students/auth_page.dart';
-import 'package:education_app/pages/teachers/teacher_login_page.dart';
 import 'package:education_app/utils/dependencies.dart';
 import 'package:education_app/utils/screen_size.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class LoginPage extends StatelessWidget {
-  LoginPage({super.key});
+class TeacherLoginPage extends StatelessWidget {
+  TeacherLoginPage({super.key});
 
   // text editing controllers
-  final usernameController = TextEditingController();
+  final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final AuthController authController = Get.find<AuthController>();
 
   //sign user in method
-  void signStudentIn() async {
-    final result = await authController.signIn(
-      usernameController.text.trim(),
+  void signUserIn() async {
+    final result = await authController.teacherSignIn(
+      // TO DO
+      emailController.text.trim(),
       passwordController.text.trim(),
     );
 
@@ -33,7 +34,7 @@ class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.grey[100],
       body: SafeArea(
         child: Center(
           child: Column(
@@ -59,16 +60,16 @@ class LoginPage extends StatelessWidget {
                   width: screenWidth(context) * 0.6,
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.blue,
-                    borderRadius: BorderRadius.circular(8),
+                    color: Colors.grey[400],
+                    borderRadius: BorderRadius.circular(4),
                   ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       const SizedBox(height: 50),
                       MyTextField(
-                        controller: usernameController,
-                        hintText: "Username",
+                        controller: emailController,
+                        hintText: "Email Address",
                         obscureText: false,
                       ),
 
@@ -85,23 +86,12 @@ class LoginPage extends StatelessWidget {
                         padding: EdgeInsets.symmetric(
                           horizontal: screenWidth(context) * 0.05,
                         ),
-
-                        // child: Align(
-                        //   alignment: Alignment.centerRight,
-                        //   // child: Padding(
-                        //   //   padding: const EdgeInsets.only(right: 8),
-                        //   //   child: Text(
-                        //   //     'Forgot Password?',
-                        //   //     style: TextStyle(color: Colors.black),
-                        //   //   ),
-                        //   // ),
-                        // ),
                         child: Align(
                           alignment: Alignment.centerRight,
                           child: GestureDetector(
-                          onTap: () => Get.to(() => TeacherLoginPage()),
+                          onTap: () => Get.to(() => LoginPage()),
                           child: const Text(
-                            'Teacher Login',
+                            'Student Login',
                             style: TextStyle(
                               color: Colors.black,
                               decoration: TextDecoration.underline,
@@ -117,13 +107,13 @@ class LoginPage extends StatelessWidget {
 
               const SizedBox(height: 25),
               //sign in button
-              myButton(onTap: signStudentIn),
-
-              //potentially register now?
+              myButton(onTap: signUserIn),
             ],
           ),
         ),
       ),
+
+      //LOG IN PAGE FOR TEACHERS
     );
   }
 }

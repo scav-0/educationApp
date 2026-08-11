@@ -76,13 +76,17 @@ class MultipleChoiceState extends State<MultipleChoice> {
                     ? Colors.lightBlue.shade100
                     : Colors.white,
               ),
-              child: SizedBox(
-                height: 36,
-                width: 200,
-                child: widget.displayOptions(
-                  i,
-                ), 
+              // child: SizedBox(
+              //   height: 36,
+              //   width: 200,
+              //   child: widget.displayOptions(
+              //     i,
+              //   ),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: widget.displayOptions(i),
               ),
+              // ),
             ),
           ),
         ),

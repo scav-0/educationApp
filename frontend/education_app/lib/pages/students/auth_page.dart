@@ -1,6 +1,8 @@
-import 'package:education_app/pages/home_page.dart';
+import 'package:education_app/pages/students/home_page.dart';
 import 'package:education_app/pages/login_page.dart';
+import 'package:education_app/pages/teachers/teacher_home_page.dart';
 import 'package:education_app/utils/dependencies.dart';
+import 'package:education_app/utils/user.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -13,7 +15,11 @@ class AuthPage extends StatelessWidget{
 
     return Obx((){
       if(authController.isSignedIn.value){
-        return HomePage();
+        if(authController.currentUser.value is Teacher){
+          return TeacherHomePage();
+        }else{
+          return HomePage();
+        }
       } else {
         return LoginPage();
       }

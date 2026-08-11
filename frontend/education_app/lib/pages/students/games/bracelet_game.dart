@@ -1,9 +1,9 @@
 import 'dart:math';
 
 import 'package:education_app/components/multipleChoice.dart';
-import 'package:education_app/pages/games/painter/circularBraceletPainter.dart';
+import 'package:education_app/pages/students/games/painter/circularBraceletPainter.dart';
 import 'package:education_app/components/my_bottom_nav.dart';
-import 'package:education_app/pages/games/painter/lineBraceletPainter.dart';
+import 'package:education_app/pages/students/games/painter/lineBraceletPainter.dart';
 import 'package:education_app/utils/int_to_colour.dart';
 import 'package:education_app/utils/skill_controller.dart';
 import 'package:flutter/material.dart';
@@ -35,8 +35,12 @@ class BraceletGamePageState extends State<BraceletGamePage> {
   }
 
   Widget displayOptions(int index) {
-    return CustomPaint(
-      painter: LineBraceletPainter(beadColors: options[index]),
+    return SizedBox(
+      height: 36,
+      width: 200,
+      child: CustomPaint(
+        painter: LineBraceletPainter(beadColors: options[index]),
+      ),
     );
   }
 

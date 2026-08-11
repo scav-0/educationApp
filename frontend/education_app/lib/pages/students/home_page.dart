@@ -1,7 +1,8 @@
-import 'package:education_app/pages/games/bracelet_game.dart';
+import 'package:education_app/pages/students/auth_page.dart';
+import 'package:education_app/pages/students/games/bracelet_game.dart';
 import 'package:education_app/components/my_bottom_nav.dart';
-import 'package:education_app/pages/games/hex_game.dart';
-import 'package:education_app/pages/games/symbol_game.dart';
+import 'package:education_app/pages/students/games/hex_game.dart';
+import 'package:education_app/pages/students/games/symbol_game.dart';
 import 'package:education_app/utils/dependencies.dart';
 import 'package:education_app/components/game_cards.dart';
 import 'package:flutter/material.dart';
@@ -37,6 +38,7 @@ class HomePage extends StatelessWidget {
         "",
         snackPosition: SnackPosition.BOTTOM,
       );
+      Get.to(() => AuthPage());
     } else {
       Get.snackbar('Error', result, snackPosition: SnackPosition.BOTTOM);
     }
@@ -48,9 +50,7 @@ class HomePage extends StatelessWidget {
       decoration: BoxDecoration(
         image: DecorationImage(
           image: AssetImage('assets/images/clouds1.jpg'),
-          repeat: ImageRepeat.repeat, // tiles in both directions
-          // repeat: ImageRepeat.repeatX, // tiles horizontally only
-          // repeat: ImageRepeat.repeatY, // tiles vertically only
+          repeat: ImageRepeat.repeat, 
         ),
       ),
       child: Scaffold(
@@ -68,7 +68,7 @@ class HomePage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Center(
-              child: Text("Welcome back ${authController.signedInFirstName}!"),
+              child: Text("Welcome back ${authController.currentUser.value?.firstName}!"),
             ),
             const SizedBox(height: 50),
 

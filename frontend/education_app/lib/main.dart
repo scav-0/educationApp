@@ -1,12 +1,14 @@
-import 'package:education_app/pages/auth_page.dart';
+import 'package:education_app/pages/students/auth_page.dart';
 import 'package:education_app/utils/dependencies.dart';
 import 'package:education_app/utils/skill_controller.dart';
+import 'package:education_app/utils/stats_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 void main() async {
   Get.put(AuthController());
   Get.put(SkillController());
+  Get.put(StatsController());
   runApp(const MyApp());
 }
 

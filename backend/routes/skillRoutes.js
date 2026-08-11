@@ -6,7 +6,7 @@ import PKnownNext from '../utils/bayesian.js';
 
 const router = express.Router();
 
-const games = ['bracelet', 'symbol'];//UPDATE AS MORE GAMES ARE ADDED
+const games = ['bracelet', 'symbol', 'honeycomb'];//UPDATE AS MORE GAMES ARE ADDED
 const defaultPknow = 0.3;
 
 
@@ -90,6 +90,8 @@ router.post('/update', authenticateToken, async (req, res) => {
             case 'symbol':
                 pKnow = PKnownNext(pKnow, 0.01, 0.25, 0.1, correct);
                 break;
+            case 'honeycomb':
+                pKnow = PKnownNext(pKnow, 0.01,0.15,0.2, correct);
             //add more when more games are added (IS IT POSSIBLE TO CREATE OBJECTS INSTEAD OF HAVING TO UPDATE IN DIFFERENT PLACES)
         }
 

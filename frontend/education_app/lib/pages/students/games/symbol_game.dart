@@ -5,7 +5,7 @@ import 'dart:math';
 import 'package:education_app/components/multipleChoice.dart';
 import 'package:education_app/components/my_bottom_nav.dart';
 import 'package:education_app/data/badWordFilter.dart';
-import 'package:education_app/pages/games/painter/toSymbols.dart';
+import 'package:education_app/pages/students/games/painter/toSymbols.dart';
 import 'package:education_app/utils/skill_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -101,8 +101,11 @@ class SymbolGamePageState extends State<SymbolGamePage> {
       }
 
       while (word.length != wordLength) {
-        if (word.isNotEmpty && rng.nextDouble() < 0.4) {
-          word += word[rng.nextInt(word.length)]; //40% chance of a repeast
+        // force a repeat if we're running out of unique symbols
+        final uniqueCount = word.split('').toSet().length;
+        if (word.isNotEmpty &&
+            (rng.nextDouble() < 0.4 || uniqueCount >= symbolIcons.length)) {
+          word += word[rng.nextInt(word.length)]; // reuse existing letter
         } else {
           word += String.fromCharCode(65 + rng.nextInt(26));
         }
@@ -301,7 +304,7 @@ class SymbolGamePageState extends State<SymbolGamePage> {
                   IntrinsicWidth(
                     child: Container(
                       height: 100,
-                      
+
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(12),

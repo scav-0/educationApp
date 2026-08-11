@@ -3,6 +3,7 @@ import express from 'express';
 import db from './startup/db.js';
 import studentRoutes from './routes/studentRoutes.js';
 import skillRoutes from './routes/skillRoutes.js';
+import teacherRoutes from './routes/teacherRoutes.js';
 import cors from 'cors';
 
 // dotenv.config();
@@ -18,6 +19,7 @@ app.use(express.json());
 //routes go here!
 app.use('/api/students', studentRoutes);
 app.use('/api/skills', skillRoutes);
+app.use('/api/teachers',teacherRoutes);
 
 const port = process.env.PORT || 3000;
 
