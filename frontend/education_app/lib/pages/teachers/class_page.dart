@@ -1,5 +1,6 @@
 import 'package:education_app/components/class_button.dart';
 import 'package:education_app/pages/teachers/create_student_page.dart';
+import 'package:education_app/pages/teachers/view_students_page.dart';
 import 'package:education_app/utils/stats_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -140,8 +141,9 @@ class ClassPageState extends State<ClassPage> {
                         name: schoolClass.name,
                         onTap: () {
                           Get.to(
-                            () => ClassPage(
-                              // classId: schoolClass.id,
+                            () => StudentsPage(
+                              classId: schoolClass.id,
+                              className: schoolClass.name,
                             ),
                           );
                         },

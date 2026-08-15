@@ -1,4 +1,5 @@
 import 'package:education_app/pages/teachers/class_page.dart';
+import 'package:education_app/pages/teachers/view_students_page.dart';
 import 'package:education_app/utils/dependencies.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -78,7 +79,7 @@ class TeacherHomePage extends StatelessWidget {
                       title: "Students",
                       icon: Icons.people,
                       onTap: () {
-                        Get.to(() => TeacherHomePage());
+                        Get.to(() => StudentsPage());
                       },
                       color: Colors.green.shade300,
                     ),

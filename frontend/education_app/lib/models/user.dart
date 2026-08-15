@@ -1,3 +1,5 @@
+
+
 abstract class User {
   final int id;
   final String firstName;
@@ -35,13 +37,16 @@ class Teacher extends User{
 
 class Student extends User{
   final String username;
-  
+  int? classId;
+  String? className;
+
   Student({
     required super.id,
     required super.firstName,
     required super.lastName,
-    required this.username
-    
+    required this.username,
+    this.classId,
+    this.className
   });
 
   factory Student.fromJson(Map<String, dynamic> json) {
@@ -50,10 +55,15 @@ class Student extends User{
       firstName: json['first_name'],
       lastName: json['last_name'],
       username: json['username'],
+      classId: json['class_id'],
+      className: json['class_name'],
     );
 
   }
 }
 
 
+ 
+  
 
+ 
