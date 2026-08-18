@@ -1,5 +1,3 @@
-//to be deleted
-
 //create initial users with encrypted passwords
 
 import { pool } from './db.js';

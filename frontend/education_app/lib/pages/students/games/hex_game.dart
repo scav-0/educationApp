@@ -2,14 +2,13 @@ import 'dart:math';
 
 import 'package:education_app/components/my_bottom_nav.dart';
 import 'package:education_app/components/honeyComb.dart';
+import 'package:education_app/utils/game_audio.dart';
 import 'package:education_app/utils/skill_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class HexGamePage extends StatefulWidget {
   const HexGamePage({super.key});
-
-  //DIFFICULTY WILL BE THE LENGTH OF THE BRACELET/ maybe less colours too?
 
   @override
   State<StatefulWidget> createState() => HexGamePageState();
@@ -52,8 +51,8 @@ class HexGamePageState extends State<HexGamePage> {
       rows = 5;
     } else if (p > 0.6) {
       columns = 4;
-      rows =4;
-    } else if(p>0.4){
+      rows = 4;
+    } else if (p > 0.4) {
       columns = 3;
     } else {
       columns = 2;
@@ -66,7 +65,6 @@ class HexGamePageState extends State<HexGamePage> {
       (_) => List.generate(columns, (_) => random.nextBool()),
     );
 
-    
     numbers = toNumbered(solution);
 
     // player starts with all false
@@ -96,11 +94,15 @@ class HexGamePageState extends State<HexGamePage> {
     }
 
     final timeTaken = DateTime.now().difference(questionStartTime).inSeconds;
-
+    if (correct) {
+      GameAudio.correct();
+    } else {
+      GameAudio.incorrect();
+    }
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: Text(correct ? '✅ Correct!' : '❌ Wrong!'),
+        title: Text(correct ? 'Correct!' : 'Not quite there...'),
         actions: [
           if (!correct)
             TextButton(
@@ -180,6 +182,38 @@ class HexGamePageState extends State<HexGamePage> {
         ),
       ),
       child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Honeycomb Game'),
+          backgroundColor: Colors.amber.shade400,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.help_outline),
+              tooltip: 'How to Play',
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      title: const Text('How to Play'),
+                      content: const Text(
+                        'Look at the numbers inside the honeycomb. '
+                        'Select the hexagons that contain honey.',
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: const Text('Got it'),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+            ),
+          ],
+        ),
         backgroundColor: Colors.transparent,
         bottomNavigationBar: const MyBottomNavBar(),
         body: SafeArea(
@@ -187,9 +221,33 @@ class HexGamePageState extends State<HexGamePage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text(
-                  'Which hexagons contain honey?',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                Center(
+                  child: Container(
+                    width: 300,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 15,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          blurRadius: 6,
+                          offset: Offset(0, 3),
+                          color: Colors.black12,
+                        ),
+                      ],
+                    ),
+                    child: const Text(
+                      'Which hexagons contain honey?',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 24),
                 HoneycombGrid(

@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 
+//Function to check authenticity of jwt token
 export function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];
   

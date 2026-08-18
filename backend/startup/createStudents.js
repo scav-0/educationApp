@@ -1,5 +1,3 @@
-//to be deleted
-
 //create initial users with encrypted passwords
 
 import { pool } from './db.js';
@@ -12,6 +10,7 @@ async function createStudent(username, firstName, lastName, password) {
             'SELECT * FROM students WHERE username = $1', 
             [username]
         );
+        
         if (existingStudents.length > 0) {
             console.log("Username already taken!");
             return;

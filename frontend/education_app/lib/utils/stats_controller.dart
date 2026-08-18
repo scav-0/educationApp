@@ -3,7 +3,7 @@ import 'package:education_app/pages/teachers/student_cred.dart';
 import 'package:education_app/models/class.dart';
 import 'package:education_app/utils/dependencies.dart';
 import 'package:education_app/models/user.dart';
-import 'package:flutter/material.dart';
+
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -20,6 +20,48 @@ class StatsController extends GetxController {
 
   final RxList<SkillPoint> skillHistory =
     <SkillPoint>[].obs;
+
+    RxList<Map<String, dynamic>> leaderboard =
+    <Map<String, dynamic>>[].obs;
+
+    Future<void> getLeaderboard() async {
+
+  try {
+
+    final token = await authController.storage.read(
+      key: 'token',
+    );
+
+    final response = await http.get(
+      Uri.parse('$baseUrl/api/students/leaderboard'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+
+      final data = jsonDecode(response.body);
+
+      leaderboard.value =
+          List<Map<String, dynamic>>.from(data);
+
+    } else {
+
+      print(
+        'Error getting leaderboard: '
+        '${response.statusCode}',
+      );
+
+    }
+
+  } catch (e) {
+
+    print('Error getting leaderboard: $e');
+
+  }
+}
 
   //For getting all students assigned to one teacher
   Future<void> getStudents() async {

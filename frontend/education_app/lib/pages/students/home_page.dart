@@ -21,7 +21,7 @@ class HomePage extends StatelessWidget {
     Get.to(() => SymbolGamePage());
   }
 
-  void game3() {
+  void hexGame() {
     Get.to(() => HexGamePage());
   }
 
@@ -50,13 +50,13 @@ class HomePage extends StatelessWidget {
       decoration: BoxDecoration(
         image: DecorationImage(
           image: AssetImage('assets/images/clouds1.jpg'),
-          repeat: ImageRepeat.repeat, 
+          repeat: ImageRepeat.repeat,
         ),
       ),
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
-          backgroundColor: Colors.blue,
+          backgroundColor: Colors.amber.shade400,
 
           title: Text("Home"),
           actions: [
@@ -67,50 +67,55 @@ class HomePage extends StatelessWidget {
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            const SizedBox(height: 50),
             Center(
-              child: Text("Welcome back ${authController.currentUser.value?.firstName}!"),
+              
+              child: Text(
+                "Welcome back ${authController.currentUser.value?.firstName}!",
+                style:  TextStyle(
+                  
+                  fontSize: 20,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
             ),
             const SizedBox(height: 50),
 
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                gameCard(title: "Bracelets", icon: Icons.rocket_launch, color: Colors.green, onTap: braceletGame),
-                // IconButton(
-                //   onPressed: braceletGame,
-                //   icon: Icon(Icons.rocket_launch),
-                //   iconSize: 100,
-                //   color: Colors.green,
-                // ),
+                gameCard(
+                  title: "Bracelet",
+                  icon: Container(
+                    height: 80,
+                    child: Image.asset('icons/beads.png', color: Colors.white),
+                  ),
+                  color: Colors.red,
+                  onTap: braceletGame,
+                ),
+
                 const SizedBox(width: 50),
-                gameCard(title: "game3", icon: Icons.hexagon_outlined, color: Colors.red, onTap: game3),
-                // IconButton(
-                //   onPressed: game3,
-                //   icon: Icon(Icons.hexagon_outlined),
-                //   iconSize: 100,
-                //   color: Colors.purple,
-                // ),
+                gameCard(
+                  title: "Honeycomb",
+                  icon: Icon(Icons.hexagon_outlined, size: 80, color: Colors.white),
+                  color: Colors.yellow.shade800,
+                  onTap: hexGame,
+                ),
               ],
             ),
             const SizedBox(height: 50),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                gameCard(title: "Passwords", icon: Icons.abc_outlined, color: const Color.fromARGB(255, 8, 59, 136), onTap: symbolGame),
-                const SizedBox(width: 50),
-                gameCard(title: "Game4", icon: Icons.access_alarm, color: Colors.yellow, onTap: game4),
-                // IconButton(
-                //   onPressed: symbolGame,
-                //   icon: Icon(Icons.abc_outlined),
-                //   color: Colors.pink,
-                //   iconSize: 100,
-                // ),
-                // IconButton(
-                //   onPressed: game4,
-                //   icon: Icon(Icons.accessible_rounded),
-                //   iconSize: 100,
-                //   color: Colors.blue,
-                // ),
+                gameCard(
+                  title: "Password",
+                  icon: Icon(Icons.abc_outlined, size: 80, color: Colors.white),
+                  color: Colors.pink.shade300,
+                  onTap: symbolGame,
+                ),
+
+                // const SizedBox(width: 50),
+                // gameCard(title: "Game4", icon: Icons.access_alarm, color: Colors.yellow, onTap: game4),
               ],
             ),
           ],

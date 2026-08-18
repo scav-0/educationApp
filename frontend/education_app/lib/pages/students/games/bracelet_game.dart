@@ -4,36 +4,49 @@ import 'package:education_app/components/multipleChoice.dart';
 import 'package:education_app/pages/students/games/painter/circularBraceletPainter.dart';
 import 'package:education_app/components/my_bottom_nav.dart';
 import 'package:education_app/pages/students/games/painter/lineBraceletPainter.dart';
+import 'package:education_app/utils/game_audio.dart';
 import 'package:education_app/utils/int_to_colour.dart';
 import 'package:education_app/utils/skill_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+///Class for the Bracelet Game
+///The class is stateful as it changes depending on difficulty or change of problem
 class BraceletGamePage extends StatefulWidget {
   const BraceletGamePage({super.key});
-
-  //DIFFICULTY WILL BE THE LENGTH OF THE BRACELET/ maybe less colours too?
 
   @override
   State<StatefulWidget> createState() => BraceletGamePageState();
 }
 
 class BraceletGamePageState extends State<BraceletGamePage> {
-  late List<int> beadColors;
+  //skill controller for any information needed from the API
   final SkillController skillController = Get.find<SkillController>();
 
+  //Parameter for the question
+  late List<int> beadColors;
+
+  //List of options and correct position for the multiple choice selection
   late List<List<int>> options;
   late int correctPosition;
 
+  //Initialisation of variables needed for documentation
   int attemptCount = 0;
   late DateTime questionStartTime;
   late bool firstAttempt;
+
+  //Variables needed for loading and question generation
+  bool isLoading = true;
+  int questionNumber = 0; //question doesnt reload without this paramater
+
+  //Initial state override -> loads question
   @override
   void initState() {
     super.initState();
     loadAndGenerate();
   }
 
+  //Widget for displaying the bracelets in the multipled choice boxes
   Widget displayOptions(int index) {
     return SizedBox(
       height: 36,
@@ -44,32 +57,36 @@ class BraceletGamePageState extends State<BraceletGamePage> {
     );
   }
 
-  bool isLoading = true;
-
-  int questionNumber = 0;
-
+  //Method for question generation and loading
   Future<void> loadAndGenerate() async {
+    //Fetch users p_know/difficuly for game
     await skillController.fetchSkills();
+
     generateQuestion();
+
     setState(() {
       isLoading = false; // done loading
-      attemptCount = 1;
+      attemptCount = 1; //for stats
       questionStartTime = DateTime.now();
       firstAttempt = true;
     });
   }
 
+  //Method for generation of question, creates answer, creates fake answers and array of options for choice later
   void generateQuestion() {
     setState(() {
       questionNumber++;
       beadColors = [];
-
-      //Create random bead Colors array -> to be replaced
       double p = skillController.braceletPknow.value;
-      beadColors = generateAnswer(p);
 
-      List<List<int>> wrongAnswers = createWrongAnswers(beadColors, p);
+      beadColors = generateAnswer(p); //creates answer
 
+      List<List<int>> wrongAnswers = createWrongAnswers(
+        beadColors,
+        p,
+      ); //creates wrong answers
+
+      //shuffle answers and remember what the correct answer is
       List<int> positions = [0, 1, 2, 3];
       positions.shuffle();
       correctPosition = positions[0];
@@ -82,11 +99,14 @@ class BraceletGamePageState extends State<BraceletGamePage> {
     });
   }
 
+  ///Method for generating bracelet for question
+  ///Takes parameter p for difficulty level
   List<int> generateAnswer(double p) {
     List<int> result = [];
     final rng = Random();
-    int beadLength = 5;
 
+    //set length of bracelet based off difficulty
+    int beadLength = 5;
     for (int i = 6; i > 0; i--) {
       if (p > i / 10) {
         beadLength = i + 4;
@@ -94,6 +114,7 @@ class BraceletGamePageState extends State<BraceletGamePage> {
       }
     }
 
+    //set number of colours usable based off difficulty
     int numberOfColors = 7;
     for (int i = 9; i > 4; i--) {
       if (p > i / 10) {
@@ -102,6 +123,7 @@ class BraceletGamePageState extends State<BraceletGamePage> {
       }
     }
 
+    //Add beads to the bracelet randomly based off the above parameters
     for (int i = 0; i < beadLength; i++) {
       result.add(rng.nextInt(numberOfColors) + 1);
     }
@@ -109,7 +131,13 @@ class BraceletGamePageState extends State<BraceletGamePage> {
     return result;
   }
 
+  ///Method for post result of game, takes parameter correct, whether the user got the problem correct
   void onResult(bool correct) {
+    if (correct) {
+      GameAudio.correct();
+    } else {
+      GameAudio.incorrect();
+    }
     attemptCount++;
     final timeTaken = DateTime.now().difference(questionStartTime).inSeconds;
 
@@ -133,7 +161,10 @@ class BraceletGamePageState extends State<BraceletGamePage> {
 
               if (firstAttempt) {
                 firstAttempt = false;
-                await skillController.updateSkill('bracelet', correct);
+                await skillController.updateSkill(
+                  'bracelet',
+                  correct,
+                ); //Only update p_know once per game
               }
 
               await skillController.saveStats(
@@ -146,7 +177,7 @@ class BraceletGamePageState extends State<BraceletGamePage> {
 
               Navigator.pop(context);
               setState(() {
-                loadAndGenerate(); // should load next question....
+                loadAndGenerate(); // load next question
               });
             },
             child: const Text('Next'),
@@ -156,6 +187,7 @@ class BraceletGamePageState extends State<BraceletGamePage> {
     );
   }
 
+  //Method for building the page
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
@@ -165,12 +197,44 @@ class BraceletGamePageState extends State<BraceletGamePage> {
       decoration: BoxDecoration(
         image: DecorationImage(
           image: AssetImage('assets/images/clouds1.jpg'),
-          repeat: ImageRepeat.repeat, // tiles in both directions
-          // repeat: ImageRepeat.repeatX, // tiles horizontally only
-          // repeat: ImageRepeat.repeatY, // tiles vertically only
+          repeat: ImageRepeat.repeat,
         ),
       ),
       child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Bracelet Game'),
+          backgroundColor: Colors.amber.shade400,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.help_outline),
+              tooltip: 'How to Play',
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      title: const Text('How to Play'),
+                      content: const Text(
+                        'Compare the circular bracelet above '
+                        'with the four bracelets below. '
+                        'Select the bracelet that has the '
+                        'same colour pattern.',
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: const Text('Got it'),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+            ),
+          ],
+        ),
         backgroundColor: Colors.transparent,
         bottomNavigationBar: const MyBottomNavBar(),
         body: Center(
@@ -181,23 +245,42 @@ class BraceletGamePageState extends State<BraceletGamePage> {
                 // Question bracelet
                 SizedBox(height: 25),
                 Container(
-                  
-                  width: 180,
-                  height: 180,
+                  width: 320,
+                  padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.grey, width: 2),
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: const [
+                      BoxShadow(
+                        blurRadius: 8,
+                        offset: Offset(0, 4),
+                        color: Colors.black12,
+                      ),
+                    ],
                   ),
-                  child: CustomPaint(
-                    painter: CircularBraceletPainter(
-                      beadColors: beadColors,
-                      randomNo: Random().nextInt(beadColors.length),
-                    ),
+                  child: Column(
+                    children: [
+                      const Text(
+                        'Which bracelet is the same?',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 19),
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      SizedBox(
+                        width: 180,
+                        height: 180,
+                        child: CustomPaint(
+                          painter: CircularBraceletPainter(
+                            beadColors: beadColors,
+                            randomNo: Random().nextInt(beadColors.length),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-
-                Text("Which Bracelet is the same?"),
                 const SizedBox(height: 24),
 
                 // Multiple choice options

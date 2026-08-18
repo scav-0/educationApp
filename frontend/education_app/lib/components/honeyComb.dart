@@ -20,13 +20,12 @@ class HoneycombGrid extends StatelessWidget {
   double get hexH => sqrt(3) * sideLength;
 
   double get totalWidth {
-    final cols = numbers[0].length;
-    final rows = numbers.length;
-    // rightmost hex is at col=cols-1, row=rows-1
-    // its center x = sideLength + (cols-1 + rows-1) * 1.5 * sideLength
-    // add sideLength padding on each side
-    return sideLength + (cols + rows - 2) * 1.5 * sideLength + 2 * sideLength;
-  }
+  final cols = numbers[0].length;
+  final rows = numbers.length;
+
+  return 2 * sideLength +
+      (cols + rows - 2) * 1.5 * sideLength;
+}
 
  double get totalHeight {
   final cols = numbers[0].length;

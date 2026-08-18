@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 Widget gameCard({
   required String title,
-  required IconData icon,
+  required Widget icon,
   required Color color,
   required VoidCallback onTap,
 }) {
@@ -25,11 +25,7 @@ Widget gameCard({
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            icon,
-            size: 80,
-            color: Colors.white,
-          ),
+          icon,
           const SizedBox(height: 15),
           Text(
             title,

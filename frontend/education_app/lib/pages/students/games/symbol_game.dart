@@ -1,11 +1,10 @@
 // ignore_for_file: no_logic_in_create_state
-
 import 'dart:math';
-
 import 'package:education_app/components/multipleChoice.dart';
 import 'package:education_app/components/my_bottom_nav.dart';
 import 'package:education_app/data/badWordFilter.dart';
 import 'package:education_app/pages/students/games/painter/toSymbols.dart';
+import 'package:education_app/utils/game_audio.dart';
 import 'package:education_app/utils/skill_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -112,8 +111,6 @@ class SymbolGamePageState extends State<SymbolGamePage> {
       }
     } while (containsProfanity(word));
 
-    //add a check for swear words as it is a kids game
-
     return word;
   }
 
@@ -124,6 +121,11 @@ class SymbolGamePageState extends State<SymbolGamePage> {
   }
 
   void onResult(bool correct) {
+    if (correct) {
+      GameAudio.correct();
+    } else {
+      GameAudio.incorrect();
+    }
     final timeTaken = DateTime.now().difference(questionStartTime).inSeconds;
     showDialog(
       context: context,
@@ -284,52 +286,100 @@ class SymbolGamePageState extends State<SymbolGamePage> {
       decoration: BoxDecoration(
         image: DecorationImage(
           image: AssetImage('assets/images/clouds1.jpg'),
-          repeat: ImageRepeat.repeat, // tiles in both directions
-          // repeat: ImageRepeat.repeatX, // tiles horizontally only
-          // repeat: ImageRepeat.repeatY, // tiles vertically only
+          repeat: ImageRepeat.repeat,
         ),
       ),
       child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Symbol Game'),
+          backgroundColor: Colors.amber.shade400,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.help_outline),
+              tooltip: 'How to Play',
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      title: const Text('How to Play'),
+                      content: const Text(
+                        'Use the clues provided to work out the '
+                        'correct password. Select the symbols that '
+                        'you think make up the correct sequence.',
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: const Text('Got it'),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+            ),
+          ],
+        ),
         backgroundColor: Colors.transparent,
         bottomNavigationBar: const MyBottomNavBar(),
         body: Center(
           child: SingleChildScrollView(
-            child: Container(
-              // decoration: BoxDecoration(color: Colors.white),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // Question ds
-                  SizedBox(height: 25),
-                  IntrinsicWidth(
-                    child: Container(
-                      height: 100,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Question ds
+                const SizedBox(height: 25),
 
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.grey, width: 2),
+                Container(
+                  width: 320,
+                  padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
+
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: const [
+                      BoxShadow(
+                        blurRadius: 8,
+                        offset: Offset(0, 4),
+                        color: Colors.black12,
                       ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.min,
-                        children: buildSymbolRow(answer),
-                      ),
-                    ),
+                    ],
                   ),
 
-                  Text("What is the password?"),
-                  const SizedBox(height: 24),
+                  child: Column(
+                    children: [
+                      const Text(
+                        'What is the password?',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 19),
+                      ),
 
-                  // Multiple choice options
-                  MultipleChoice(
-                    key: ValueKey(questionNumber),
-                    displayOptions: displayOptions,
-                    onResult: onResult,
-                    correctPostion: correctPosition,
+                      const SizedBox(height: 15),
+
+                      SizedBox(
+                        height: 70,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: buildSymbolRow(answer),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+
+                const SizedBox(height: 24),
+
+                // Multiple choice options
+                MultipleChoice(
+                  key: ValueKey(questionNumber),
+                  displayOptions: displayOptions,
+                  onResult: onResult,
+                  correctPostion: correctPosition,
+                ),
+              ],
             ),
           ),
         ),

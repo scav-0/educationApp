@@ -281,6 +281,53 @@ router.get(
     }
 );
 
+router.get('/leaderboard', authenticateToken, async (req, res) => {
+    try {
+
+        const studentId = req.user;
+
+        const result = await pool.query(
+            `
+            SELECT
+                students.id,
+                students.first_name,
+                students.last_name,
+                COUNT(game_stats.id) AS games_played
+
+            FROM students
+
+            LEFT JOIN game_stats
+                ON students.id = game_stats.student_id
+
+            WHERE students.class_id = (
+                SELECT class_id
+                FROM students
+                WHERE id = $1
+            )
+
+            GROUP BY
+                students.id,
+                students.first_name,
+                students.last_name
+
+            ORDER BY games_played DESC,
+                     students.last_name ASC
+            `,
+            [studentId]
+        );
+
+        res.status(200).json(result.rows);
+
+    } catch (error) {
+
+        console.error('Error getting leaderboard:', error);
+
+        res.status(500).json({
+            message: 'Server error'
+        });
+    }
+});
+
 
 
 

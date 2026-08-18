@@ -55,49 +55,105 @@ class MultipleChoiceState extends State<MultipleChoice> {
   Widget build(BuildContext context) {
     confirmed = false;
     return Column(
-      children: [
-        //need to create 4 boxes
-        ...List.generate(
-          4,
-          (i) => GestureDetector(
-            //Create 4 gesture detectors with index i, ... makes it not a list of lists
-            onTap: () => onTap(i),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 20),
-              padding: const EdgeInsets.symmetric(
-                vertical: 20,
-                horizontal: 120,
-              ),
-              decoration: BoxDecoration(
-                border: Border.all(color: getBorderColor(i), width: 2),
-                borderRadius: BorderRadius.circular(12),
-                color: selectedIndex == i
-                    ? Colors.lightBlue.shade100
-                    : Colors.white,
-              ),
-              // child: SizedBox(
-              //   height: 36,
-              //   width: 200,
-              //   child: widget.displayOptions(
-              //     i,
-              //   ),
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                child: widget.displayOptions(i),
-              ),
-              // ),
+      children: [Center(
+  child: SizedBox(
+    width: 500,
+     // <-- control total grid height here
+    child: GridView.count(
+      mainAxisExtent: 115,
+      crossAxisCount: 2,
+      shrinkWrap: true,
+
+      physics: const NeverScrollableScrollPhysics(),
+
+      crossAxisSpacing: 10,
+      mainAxisSpacing: 10,
+
+      children: List.generate(
+        4,
+        (i) => GestureDetector(
+          onTap: () => onTap(i),
+
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+
+            padding: const EdgeInsets.all(8),
+
+            decoration: BoxDecoration(
+              boxShadow: const [
+                BoxShadow(
+                  blurRadius: 5,
+                  offset: Offset(0, 2),
+                  color: Colors.black12,
+                ),
+              ],
+
+              borderRadius: BorderRadius.circular(12),
+
+              color: selectedIndex == i
+                  ? Colors.lightBlue.shade100
+                  : Colors.white,
+            ),
+
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: widget.displayOptions(i),
             ),
           ),
         ),
-
-        const SizedBox(height: 16),
+      ),
+    ),
+  ),
+),const SizedBox(height: 16),
 
         ElevatedButton(
           onPressed: selectedIndex != null && !confirmed ? onConfirm : null,
           child: const Text('Confirm'),
-        ),
-      ],
+        ),]
+      // children: [
+      //   //need to create 4 boxes
+      //   ...List.generate(
+      //     4,
+      //     (i) => GestureDetector(
+      //       //Create 4 gesture detectors with index i, ... makes it not a list of lists
+      //       onTap: () => onTap(i),
+      //       child: AnimatedContainer(
+      //         duration: const Duration(milliseconds: 200),
+      //         margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 20),
+      //         padding: const EdgeInsets.symmetric(
+      //           vertical: 20,
+      //           horizontal: 120,
+      //         ),
+      //         decoration: BoxDecoration(
+      //           boxShadow: [
+      //                   BoxShadow(
+      //                     blurRadius: 6,
+      //                     offset: Offset(0, 3),
+      //                     color: Colors.black12,
+      //                   ),
+      //                 ],
+      //           borderRadius: BorderRadius.circular(12),
+      //           color: selectedIndex == i
+      //               ? Colors.lightBlue.shade100
+      //               : Colors.white,
+      //         ),
+              
+      //         child: FittedBox(
+      //           fit: BoxFit.scaleDown,
+      //           child: widget.displayOptions(i),
+      //         ),
+      //         // ),
+      //       ),
+      //     ),
+      //   ),
+
+      //   const SizedBox(height: 16),
+
+      //   ElevatedButton(
+      //     onPressed: selectedIndex != null && !confirmed ? onConfirm : null,
+      //     child: const Text('Confirm'),
+      //   ),
+      // ],
     );
   }
 }

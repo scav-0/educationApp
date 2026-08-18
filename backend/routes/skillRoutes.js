@@ -62,9 +62,9 @@ router.post('/update', authenticateToken, async (req, res) => {
         const student_id = req.user;
         const {  game, correct } = req.body;
         
-        console.log("studentID : " + student_id);
-        console.log("game : " + game);
-        console.log("correct : " + correct);
+        // console.log("studentID : " + student_id);
+        // console.log("game : " + game);
+        // console.log("correct : " + correct);
         
 
         const skillResult = await pool.query(
@@ -82,7 +82,7 @@ router.post('/update', authenticateToken, async (req, res) => {
         }
 
         let pKnow = parseFloat(skillResult.rows[0].p_know);
-        console.log("Pknow before.. : "+pKnow);
+        // console.log("Pknow before.. : "+pKnow);
         switch(game){
             case 'bracelet':
                 pKnow = PKnownNext(pKnow, 0.01, 0.25, 0.1, correct);
@@ -95,8 +95,8 @@ router.post('/update', authenticateToken, async (req, res) => {
             //add more when more games are added (IS IT POSSIBLE TO CREATE OBJECTS INSTEAD OF HAVING TO UPDATE IN DIFFERENT PLACES)
         }
 
-        console.log("Pknow after.. : "+pKnow);
-        console.log("\n")
+        // console.log("Pknow after.. : "+pKnow);
+        // console.log("\n")
 
 
         await pool.query(
