@@ -12,28 +12,27 @@ import 'base_url.dart';
 class StatsController extends GetxController {
   final AuthController authController = Get.find<AuthController>();
 
-  final classesUrl = Uri.parse('$baseUrl/api/teachers/get-classes');
+  
 
   final RxList<SchoolClass> classes = <SchoolClass>[].obs;
 
   final RxList<Student> students = <Student>[].obs;
 
-  final RxList<SkillPoint> skillHistory =
-    <SkillPoint>[].obs;
+  final RxList<SkillPoint> skillHistory = <SkillPoint>[].obs;
 
-    RxList<Map<String, dynamic>> leaderboard =
-    <Map<String, dynamic>>[].obs;
+  RxList<Map<String, dynamic>> leaderboard = <Map<String, dynamic>>[].obs;
 
-    Future<void> getLeaderboard() async {
-
+  RxList<GamesPerDay> gamesPerDay = <GamesPerDay>[].obs;
+  
+  Future<void> getGamesPerDay(int studentId) async {
   try {
-
-    final token = await authController.storage.read(
-      key: 'token',
-    );
+    
+    final token = await authController.storage.read(key: 'token');
 
     final response = await http.get(
-      Uri.parse('$baseUrl/api/students/leaderboard'),
+      Uri.parse(
+        '$baseUrl/api/students/$studentId/stats/games-per-day',
+      ),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -41,27 +40,48 @@ class StatsController extends GetxController {
     );
 
     if (response.statusCode == 200) {
-
       final data = jsonDecode(response.body);
 
-      leaderboard.value =
-          List<Map<String, dynamic>>.from(data);
-
+      gamesPerDay.value = (data as List)
+          .map((item) => GamesPerDay.fromJson(item))
+          .toList();
     } else {
-
       print(
-        'Error getting leaderboard: '
+        'Error getting games per day: '
         '${response.statusCode}',
       );
-
     }
-
   } catch (e) {
-
-    print('Error getting leaderboard: $e');
-
+    print('Error getting games per day: $e');
   }
 }
+
+  Future<void> getLeaderboard() async {
+    try {
+      final token = await authController.storage.read(key: 'token');
+
+      final response = await http.get(
+        Uri.parse('$baseUrl/api/students/leaderboard'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        leaderboard.value = List<Map<String, dynamic>>.from(data);
+      } else {
+        print(
+          'Error getting leaderboard: '
+          '${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      print('Error getting leaderboard: $e');
+    }
+  }
 
   //For getting all students assigned to one teacher
   Future<void> getStudents() async {
@@ -103,7 +123,7 @@ class StatsController extends GetxController {
       final token = await authController.storage.read(key: 'token');
 
       final response = await http.get(
-        Uri.parse('$baseUrl/api/teachers/$classId/students'),
+        Uri.parse('$baseUrl/api/classes/$classId/students'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -132,7 +152,7 @@ class StatsController extends GetxController {
   Future<void> getClasses() async {
     try {
       final response = await http.get(
-        classesUrl,
+        Uri.parse('$baseUrl/api/classes/get-classes'),
         headers: {
           'Authorization':
               'Bearer ${await authController.storage.read(key: 'token')}',
@@ -156,7 +176,7 @@ class StatsController extends GetxController {
       final token = await authController.storage.read(key: 'token');
 
       final response = await http.delete(
-        Uri.parse('$baseUrl/api/teachers/$classId'),
+        Uri.parse('$baseUrl/api/classes/$classId'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -191,7 +211,7 @@ class StatsController extends GetxController {
       final token = await authController.storage.read(key: 'token');
 
       final response = await http.post(
-        Uri.parse('$baseUrl/api/teachers/create-classes'),
+        Uri.parse('$baseUrl/api/classes/create-classes'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -226,177 +246,168 @@ class StatsController extends GetxController {
 
   Future<bool> changeStudentPassword(int studentId, String password) async {
     try {
+      final token = await authController.storage.read(key: 'token');
 
-    final token =
-        await authController.storage.read(
-      key: 'token',
-    );
+      final response = await http.post(
+        Uri.parse('$baseUrl/api/students/$studentId/password'),
 
-    final response = await http.post(
-      Uri.parse(
-        '$baseUrl/api/students/$studentId/password',
-      ),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
 
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
+        body: jsonEncode({'password': password}),
+      );
 
-      body: jsonEncode({
-        'password': password,
-      }),
-    );
+      print(
+        'Change password status: '
+        '${response.statusCode}',
+      );
 
-    print(
-      'Change password status: '
-      '${response.statusCode}',
-    );
+      print(
+        'Change password body: '
+        '${response.body}',
+      );
 
-    print(
-      'Change password body: '
-      '${response.body}',
-    );
+      return response.statusCode == 200;
+    } catch (e) {
+      print('Error changing student password: $e');
 
-    return response.statusCode == 200;
-
-  } catch (e) {
-
-    print(
-      'Error changing student password: $e',
-    );
-
-    return false;
-  }
+      return false;
+    }
   }
 
-  Future<bool> changeStudentClass(
+  Future<bool> changeStudentClass(int studentId, int classId) async {
+    try {
+      final token = await authController.storage.read(key: 'token');
+
+      final response = await http.post(
+        Uri.parse('$baseUrl/api/students/$studentId/class'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({'classId': classId}),
+      );
+
+      print('Change class status: ${response.statusCode}');
+      print('Body: ${response.body}');
+
+      return response.statusCode == 200;
+    } catch (e) {
+      print('Error changing student class: $e');
+
+      return false;
+    }
+  }
+
+  Future<void> getStudentStats(int studentId, String game) async {
+    try {
+      skillHistory.clear();
+      final token = await authController.storage.read(key: 'token');
+
+      final response = await http.get(
+        Uri.parse('$baseUrl/api/students/$studentId/stats/$game'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      // print(
+      //   'Stats status: ${response.statusCode}',
+      // );
+
+      // print(
+      //   'Stats body: ${response.body}',
+      // );
+
+      if (response.statusCode == 200) {
+        final List data = jsonDecode(response.body);
+
+        skillHistory.value = data
+            .map((json) => SkillPoint.fromJson(json))
+            .toList();
+      }
+    } catch (e) {
+      print('Error getting student stats: $e');
+    }
+  }
+
+  RxMap<String, dynamic> studentSummary =
+    <String, dynamic>{}.obs;
+
+  Future<void> getStudentSummary(
+    
   int studentId,
-  int classId,
+  String? game,
 ) async {
-
   try {
-
+    studentSummary.clear();
     final token =
-        await authController.storage.read(
-      key: 'token',
-    );
+        await authController.storage.read(key: 'token');
 
-    final response = await http.post(
-      Uri.parse(
-        '$baseUrl/api/students/$studentId/class',
-      ),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-      body: jsonEncode({
-        'classId': classId,
-      }),
-    );
+    String url =
+        '$baseUrl/api/skills/$studentId/summary';
 
-    print('Change class status: ${response.statusCode}');
-    print('Body: ${response.body}');
-
-    return response.statusCode == 200;
-
-  } catch (e) {
-
-    print('Error changing student class: $e');
-
-    return false;
-  }
-}
-
-Future<void> getStudentStats(
-  int studentId,
-  String game,
-) async {
-
-  try {
-    skillHistory.clear();
-    final token =
-        await authController.storage.read(
-      key: 'token',
-    );
-
-    final response = await http.get(
-      Uri.parse(
-        '$baseUrl/api/students/$studentId/stats/$game',
-      ),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-    );
-
-    // print(
-    //   'Stats status: ${response.statusCode}',
-    // );
-
-    // print(
-    //   'Stats body: ${response.body}',
-    // );
-
-    if (response.statusCode == 200) {
-
-      final List data =
-          jsonDecode(response.body);
-
-      skillHistory.value = data
-          .map(
-            (json) => SkillPoint.fromJson(json),
-          )
-          .toList();
+    if (game != null) {
+      url += '?game=$game';
     }
 
-  } catch (e) {
-
-    print(
-      'Error getting student stats: $e',
-    );
-  }
-}
-
-
-Future<bool> deleteStudent(int studentId) async {
-
-  try {
-
-    final token =
-        await authController.storage.read(
-      key: 'token',
-    );
-
-    final response = await http.post(
-      Uri.parse(
-        '$baseUrl/api/students/$studentId/delete',
-      ),
-
+    final response = await http.get(
+      Uri.parse(url),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
     );
 
-    print(
-      'Delete student status: '
-      '${response.statusCode}',
-    );
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
 
-    print(
-      'Delete student body: '
-      '${response.body}',
-    );
-
-    return response.statusCode == 200;
-
+      studentSummary.value =
+          Map<String, dynamic>.from(data);
+    } else {
+      print(
+        'Error getting student summary: '
+        '${response.statusCode}',
+      );
+    }
   } catch (e) {
-
-    print(
-      'Error deleting student: $e',
-    );
-
-    return false;
+    print('Error getting student summary: $e');
   }
 }
+
+  Future<bool> deleteStudent(int studentId) async {
+    try {
+      final token = await authController.storage.read(key: 'token');
+
+      final response = await http.post(
+        Uri.parse('$baseUrl/api/students/$studentId/delete'),
+
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      print(
+        'Delete student status: '
+        '${response.statusCode}',
+      );
+
+      print(
+        'Delete student body: '
+        '${response.body}',
+      );
+
+      return response.statusCode == 200;
+    } catch (e) {
+      print('Error deleting student: $e');
+
+      return false;
+    }
+  }
+
+  Future<Object?> createStudent(String firstName, String lastName, String username, String password, int? classId) async {}
 }

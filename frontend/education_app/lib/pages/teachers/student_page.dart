@@ -1,6 +1,11 @@
+import 'package:education_app/components/app_bar.dart';
+import 'package:education_app/components/games_played.dart';
 import 'package:education_app/components/p_know_graph.dart';
+import 'package:education_app/components/stat_card.dart';
+import 'package:education_app/utils/screen_size.dart';
 import 'package:education_app/utils/stats_controller.dart';
 import 'package:education_app/models/user.dart';
+import 'package:education_app/utils/teacher_colours.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -31,10 +36,19 @@ class StudentStatsState extends State<StudentStatsPage> {
 
   void loadStats() {
     if (selectedGame == 'Overall Stats') {
+      statsController.getStudentSummary(widget.student.id, null);
+
+      statsController.getGamesPerDay(widget.student.id);
+
       return;
     }
 
     statsController.getStudentStats(
+      widget.student.id,
+      selectedGame.toLowerCase(),
+    );
+
+    statsController.getStudentSummary(
       widget.student.id,
       selectedGame.toLowerCase(),
     );
@@ -43,14 +57,11 @@ class StudentStatsState extends State<StudentStatsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          '${widget.student.firstName} '
-          '${widget.student.lastName}',
-        ),
-        backgroundColor: Colors.blue,
+      appBar: MyAppBar(
+        title: '${widget.student.firstName} ${widget.student.lastName}',
+        isStudent: false,
       ),
-
+      backgroundColor: TeacherColours.backgroundColor,
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
 
@@ -86,9 +97,10 @@ class StudentStatsState extends State<StudentStatsPage> {
             ),
 
             const SizedBox(height: 15),
-
+            const Text("P(know) is the estimated probability that the student knows the skills required to solve the puzzles.\nThe value is used to determine difficulty of each game."),
+            const SizedBox(height: 15),
             DropdownButtonFormField<String>(
-              value: selectedGame,
+              initialValue: selectedGame,
 
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
@@ -117,29 +129,22 @@ class StudentStatsState extends State<StudentStatsPage> {
               },
             ),
 
-            const SizedBox(height: 25),
+            const SizedBox(height: 20),
 
-            //GRAPHS
-            // Container(
-            //   height: 300,
-            //   width: double.infinity,
+            Obx(() => buildStatsCards()),
 
-            //   decoration: BoxDecoration(
-            //     color: Colors.grey[200],
-            //     borderRadius: BorderRadius.circular(12),
-            //   ),
+            const SizedBox(height: 30),
 
-            //   child: Center(
-            //     child: Text(
-            //       '$selectedGame graph goes here',
-            //       style: const TextStyle(fontSize: 18),
-            //     ),
-            //   ),
-            // ),
-            SizedBox(
-              height: 350,
-              width: double.infinity,
-              child: buildPKnowGraph(),
+            Center(
+              child: SizedBox(
+                height: 500,
+                width: screenWidth(context) - 100,
+                child: Obx(
+                  () => selectedGame == 'Overall Stats'
+                      ? gamesPlayedChart()
+                      : buildPKnowGraph(),
+                ),
+              ),
             ),
 
             const SizedBox(height: 30),
@@ -183,7 +188,7 @@ class StudentStatsState extends State<StudentStatsPage> {
             SizedBox(
               width: double.infinity,
 
-              child: ElevatedButton(
+              child: ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.red,
                   foregroundColor: Colors.white,
@@ -192,8 +197,8 @@ class StudentStatsState extends State<StudentStatsPage> {
                 onPressed: () {
                   confirmDeleteStudent();
                 },
-
-                child: const Text('Delete Account'),
+                icon: const Icon(Icons.delete),
+                label: const Text('Delete Account'),
               ),
             ),
           ],
@@ -445,6 +450,73 @@ class StudentStatsState extends State<StudentStatsPage> {
           ],
         );
       },
+    );
+  }
+
+  String formatTime(double seconds) {
+    final minutes = seconds ~/ 60;
+    final remainingSeconds = seconds.toInt() % 60;
+
+    return '${minutes}m ${remainingSeconds}s';
+  }
+
+  Widget buildStatsCards() {
+    final stats = statsController.studentSummary;
+
+    if (stats.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    final gamesPlayed = int.parse(stats['games_played'].toString());
+
+    final averageAttempts = double.parse(stats['average_attempts'].toString());
+
+    final averageTime = double.parse(stats['average_time'].toString());
+
+    final pKnow = double.parse(stats['p_know'].toString());
+
+    return Column(
+      children: [
+        // P(know) - full width
+        SizedBox(
+          width: double.infinity,
+          child: statCard(
+            title: selectedGame == 'Overall Stats'
+                ? 'Current P(know) (Avg.)'
+                : 'Current P(know)',
+            value: '${(pKnow * 100).toStringAsFixed(1)}%',
+          ),
+        ),
+
+        const SizedBox(height: 12),
+
+        // Other three stats
+        Row(
+          children: [
+            Expanded(
+              child: statCard(title: 'Games Played', value: '$gamesPlayed'),
+            ),
+
+            const SizedBox(width: 10),
+
+            Expanded(
+              child: statCard(
+                title: 'Avg. Attempts',
+                value: averageAttempts.toStringAsFixed(1),
+              ),
+            ),
+
+            const SizedBox(width: 10),
+
+            Expanded(
+              child: statCard(
+                title: 'Avg. Time',
+                value: formatTime(averageTime),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

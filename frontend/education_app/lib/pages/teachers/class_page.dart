@@ -1,9 +1,13 @@
+import 'package:education_app/components/app_bar.dart';
 import 'package:education_app/components/class_button.dart';
 import 'package:education_app/pages/teachers/create_student_page.dart';
 import 'package:education_app/pages/teachers/view_students_page.dart';
 import 'package:education_app/utils/stats_controller.dart';
+import 'package:education_app/utils/teacher_colours.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:excel/excel.dart';
+import 'package:file_picker/file_picker.dart';
 
 class ClassPage extends StatefulWidget {
   const ClassPage({super.key});
@@ -24,7 +28,6 @@ class ClassPageState extends State<ClassPage> {
 
   void createClassDialog() {
   final classNameController = TextEditingController();
-  final studentCountController = TextEditingController();
 
   Get.dialog(
     AlertDialog(
@@ -40,13 +43,64 @@ class ClassPageState extends State<ClassPage> {
             ),
           ),
 
+          const SizedBox(height: 25),
+
+          const Text(
+            'How would you like to add students?',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+
           const SizedBox(height: 15),
 
-          TextField(
-            controller: studentCountController,
-            keyboardType: TextInputType.number,
-            decoration: const InputDecoration(
-              labelText: 'Number of students',
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () {
+                final name =
+                    classNameController.text.trim();
+
+                if (name.isEmpty) {
+                  Get.snackbar(
+                    'Error',
+                    'Please enter a class name.',
+                  );
+                  return;
+                }
+
+                Get.back();
+
+                showStudentCountDialog(name);
+              },
+              icon: const Icon(Icons.edit),
+              label: const Text('Enter Students Manually'),
+            ),
+          ),
+
+          const SizedBox(height: 10),
+
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: () {
+                final name =
+                    classNameController.text.trim();
+
+                if (name.isEmpty) {
+                  Get.snackbar(
+                    'Error',
+                    'Please enter a class name.',
+                  );
+                  return;
+                }
+
+                Get.back();
+
+                uploadStudentSpreadsheet(name);
+              },
+              icon: const Icon(Icons.upload_file),
+              label: const Text('Upload Spreadsheet'),
             ),
           ),
         ],
@@ -57,18 +111,43 @@ class ClassPageState extends State<ClassPage> {
           onPressed: () => Get.back(),
           child: const Text('Cancel'),
         ),
+      ],
+    ),
+  );
+}
+
+void showStudentCountDialog(String className) {
+  final studentCountController =
+      TextEditingController();
+
+  Get.dialog(
+    AlertDialog(
+      title: const Text('Number of Students'),
+
+      content: TextField(
+        controller: studentCountController,
+        keyboardType: TextInputType.number,
+        decoration: const InputDecoration(
+          labelText: 'Number of students',
+        ),
+      ),
+
+      actions: [
+        TextButton(
+          onPressed: () => Get.back(),
+          child: const Text('Cancel'),
+        ),
 
         ElevatedButton(
           onPressed: () {
-            final name = classNameController.text.trim();
             final count = int.tryParse(
               studentCountController.text.trim(),
             );
 
-            if (name.isEmpty || count == null || count <= 0) {
+            if (count == null || count <= 0) {
               Get.snackbar(
                 'Error',
-                'Please enter a class name and valid size.',
+                'Please enter a valid number of students.',
               );
               return;
             }
@@ -77,7 +156,7 @@ class ClassPageState extends State<ClassPage> {
 
             Get.to(
               () => StudentEntryPage(
-                className: name,
+                className: className,
                 studentCount: count,
               ),
             );
@@ -89,73 +168,171 @@ class ClassPageState extends State<ClassPage> {
   );
 }
 
+Future<void> uploadStudentSpreadsheet(
+  String className,
+) async {
+  final result = await FilePicker.platform.pickFiles(
+    type: FileType.custom,
+    allowedExtensions: ['xlsx'],
+    withData: true,
+  );
+
+  if (result == null) {
+    return;
+  }
+
+  final bytes = result.files.single.bytes;
+
+  if (bytes == null) {
+    Get.snackbar(
+      'Error',
+      'Could not read the spreadsheet.',
+    );
+    return;
+  }
+
+  try {
+    final excel = Excel.decodeBytes(bytes);
+
+    if (excel.tables.isEmpty) {
+      Get.snackbar(
+        'Error',
+        'The spreadsheet contains no worksheets.',
+      );
+      return;
+    }
+
+    final sheet =
+        excel.tables[excel.tables.keys.first]!;
+
+    final students = <Map<String, String>>[];
+
+    // Skip row 0 because it contains the headers
+    for (int rowIndex = 1;
+        rowIndex < sheet.maxRows;
+        rowIndex++) {
+
+      final row = sheet.row(rowIndex);
+
+      if (row.length < 2) {
+        continue;
+      }
+
+      final firstName =
+          row[0]?.value?.toString().trim() ?? '';
+
+      final lastName =
+          row[1]?.value?.toString().trim() ?? '';
+
+      // Ignore completely empty rows
+      if (firstName.isEmpty &&
+          lastName.isEmpty) {
+        continue;
+      }
+
+      // Don't allow incomplete names
+      if (firstName.isEmpty ||
+          lastName.isEmpty) {
+        Get.snackbar(
+          'Error',
+          'Row ${rowIndex + 1} is missing a first or last name.',
+        );
+        return;
+      }
+
+      students.add({
+        'first_name': firstName,
+        'last_name': lastName,
+      });
+    }
+
+    if (students.isEmpty) {
+      Get.snackbar(
+        'Error',
+        'No students were found in the spreadsheet.',
+      );
+      return;
+    }
+
+    // Go to the same page used for manual entry
+    Get.to(
+      () => StudentEntryPage(
+        className: className,
+        studentCount: students.length,
+        importedStudents: students,
+      ),
+    );
+
+  } catch (e) {
+    print('Error reading spreadsheet: $e');
+
+    Get.snackbar(
+      'Error',
+      'Could not read the spreadsheet.',
+    );
+  }
+}
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Classes'),
-        backgroundColor: Colors.blue,
-      ),
-
-      body: Obx(
-  () {
-    return Column(
-      children: [
-
-        // CREATE CLASS BUTTON
-        Padding(
-          padding: const EdgeInsets.all(20),
-          child: SizedBox(
-            width: double.infinity,
-            height: 60,
-            child: ElevatedButton.icon(
-              onPressed: createClassDialog,
-              icon: const Icon(Icons.add),
-              label: const Text(
-                'Create Class',
-                style: TextStyle(fontSize: 20),
-              ),
-            ),
-          ),
-        ),
-
-        // CLASS LIST
-        Expanded(
-          child: statsController.classes.isEmpty
-              ? const Center(
-                  child: Text(
-                    'No classes found',
+      appBar: MyAppBar(title: 'Classes', isStudent: false),
+      backgroundColor: TeacherColours.backgroundColor,
+      body: Obx(() {
+        return Column(
+          children: [
+            // CREATE CLASS BUTTON
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: SizedBox(
+                width: double.infinity,
+                height: 60,
+                child: ElevatedButton.icon(
+                  onPressed: createClassDialog,
+                  icon: const Icon(Icons.add),
+                  label: const Text(
+                    'Create Class',
                     style: TextStyle(fontSize: 20),
                   ),
-                )
-              : ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  itemCount: statsController.classes.length,
-                  itemBuilder: (context, index) {
-                    final schoolClass =
-                        statsController.classes[index];
-
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 15),
-                      child: ClassButton(
-                        name: schoolClass.name,
-                        onTap: () {
-                          Get.to(
-                            () => StudentsPage(
-                              classId: schoolClass.id,
-                              className: schoolClass.name,
-                            ),
-                          );
-                        },
-                      ),
-                    );
-                  },
                 ),
-        ),
-      ],
-    );
-  },
-),
+              ),
+            ),
+
+            // CLASS LIST
+            Expanded(
+              child: statsController.classes.isEmpty
+                  ? const Center(
+                      child: Text(
+                        'No classes found',
+                        style: TextStyle(fontSize: 20),
+                      ),
+                    )
+                  : ListView.builder(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      itemCount: statsController.classes.length,
+                      itemBuilder: (context, index) {
+                        final schoolClass = statsController.classes[index];
+
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 15),
+                          child: ClassButton(
+                            name: schoolClass.name,
+                            onTap: () {
+                              Get.to(
+                                () => StudentsPage(
+                                  classId: schoolClass.id,
+                                  className: schoolClass.name,
+                                ),
+                              );
+                            },
+                          ),
+                        );
+                      },
+                    ),
+            ),
+          ],
+        );
+      }),
     );
   }
 }

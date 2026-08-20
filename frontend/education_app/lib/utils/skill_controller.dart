@@ -27,7 +27,7 @@ class SkillController extends GetxController {
       }
 
       final response = await http.get(
-        Uri.parse('$baseUrl/api/skills/${authController.currentUser.value?.id}'),
+        Uri.parse('$baseUrl/api/skills/fetch'),
         headers: {
           'Authorization':
               'Bearer ${await authController.storage.read(key: 'token') ?? ''}',

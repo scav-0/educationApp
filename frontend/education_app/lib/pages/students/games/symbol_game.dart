@@ -1,5 +1,6 @@
 // ignore_for_file: no_logic_in_create_state
 import 'dart:math';
+import 'package:education_app/components/app_bar.dart';
 import 'package:education_app/components/multipleChoice.dart';
 import 'package:education_app/components/my_bottom_nav.dart';
 import 'package:education_app/data/badWordFilter.dart';
@@ -290,9 +291,9 @@ class SymbolGamePageState extends State<SymbolGamePage> {
         ),
       ),
       child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Symbol Game'),
-          backgroundColor: Colors.amber.shade400,
+        appBar: MyAppBar(
+          title: 'Symbol Game',
+          isStudent: true,
           actions: [
             IconButton(
               icon: const Icon(Icons.help_outline),
@@ -302,11 +303,19 @@ class SymbolGamePageState extends State<SymbolGamePage> {
                   context: context,
                   builder: (context) {
                     return AlertDialog(
-                      title: const Text('How to Play'),
+                      title: const Text(
+                        'How to Play',
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
                       content: const Text(
-                        'Use the clues provided to work out the '
-                        'correct password. Select the symbols that '
-                        'you think make up the correct sequence.',
+                        'Use the symbol clues to work out the password!\n\n'
+                        '(Hint) : Look for symbols that appear more than once.\n'
+                        '            \tCould they give you a clue?',
+                        style: TextStyle(fontSize: 20),
                       ),
                       actions: [
                         TextButton(
@@ -361,9 +370,13 @@ class SymbolGamePageState extends State<SymbolGamePage> {
 
                       SizedBox(
                         height: 70,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: buildSymbolRow(answer),
+                        width: double.infinity,
+                        child: FittedBox(
+                          fit: BoxFit.contain,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: buildSymbolRow(answer),
+                          ),
                         ),
                       ),
                     ],

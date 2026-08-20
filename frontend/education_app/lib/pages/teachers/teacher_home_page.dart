@@ -1,6 +1,8 @@
+import 'package:education_app/components/app_bar.dart';
 import 'package:education_app/pages/teachers/class_page.dart';
 import 'package:education_app/pages/teachers/view_students_page.dart';
 import 'package:education_app/utils/dependencies.dart';
+import 'package:education_app/utils/teacher_colours.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:education_app/components/home_cards.dart';
@@ -10,34 +12,17 @@ class TeacherHomePage extends StatelessWidget {
 
   final AuthController authController = Get.find<AuthController>();
 
-  void logout() async {
-    final result = await authController.signOut();
-
-    if (result == 'success') {
-      authController.isSignedIn.value =
-          false; //Why doesnt it work without this?
-      Get.snackbar(
-        'Signed Out Successfully!',
-        "",
-        snackPosition: SnackPosition.BOTTOM,
-      );
-    } else {
-      Get.snackbar('Error', result, snackPosition: SnackPosition.BOTTOM);
-    }
-  }
+  
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        backgroundColor: Colors.blue,
+      backgroundColor: TeacherColours.backgroundColor,
+      appBar: MyAppBar(
+        isStudent: false,
 
-        title: Text("Home"),
-        actions: [
-          //logout button
-          IconButton(onPressed: logout, icon: Icon(Icons.logout)),
-        ],
+        title: "Home",
+        
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -46,7 +31,7 @@ class TeacherHomePage extends StatelessWidget {
             padding: const EdgeInsets.all(20),
             child: Text(
               "Welcome back ${authController.currentUser.value?.firstName}!",
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 20,),
             ),
           ),
 
@@ -65,7 +50,7 @@ class TeacherHomePage extends StatelessWidget {
                       onTap: () {
                         Get.to(() => ClassPage());
                       },
-                      color: Colors.green.shade300,
+                      color: TeacherColours.primaryColor
                     ),
                   ),
                 ),
@@ -81,7 +66,7 @@ class TeacherHomePage extends StatelessWidget {
                       onTap: () {
                         Get.to(() => StudentsPage());
                       },
-                      color: Colors.green.shade300,
+                      color: TeacherColours.primaryColor
                     ),
                   ),
                 ),

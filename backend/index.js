@@ -3,6 +3,7 @@ import db from './startup/db.js';
 import studentRoutes from './routes/studentRoutes.js';
 import skillRoutes from './routes/skillRoutes.js';
 import teacherRoutes from './routes/teacherRoutes.js';
+import classRoutes from './routes/classRoutes.js';
 import cors from 'cors';
 
 
@@ -19,6 +20,7 @@ app.use(express.json());
 app.use('/api/students', studentRoutes);
 app.use('/api/skills', skillRoutes);
 app.use('/api/teachers',teacherRoutes);
+app.use('/api/classes', classRoutes);
 
 const port = process.env.PORT || 3000;
 
@@ -27,7 +29,6 @@ const port = process.env.PORT || 3000;
 const start = async () => {
     await db();
     app.listen(port, () => console.log('listening on port ' + port));
-    
 }
 
 start();

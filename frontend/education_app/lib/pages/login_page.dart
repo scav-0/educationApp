@@ -4,6 +4,7 @@ import 'package:education_app/pages/students/auth_page.dart';
 import 'package:education_app/pages/teachers/teacher_login_page.dart';
 import 'package:education_app/utils/dependencies.dart';
 import 'package:education_app/utils/screen_size.dart';
+import 'package:education_app/utils/teacher_colours.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -33,12 +34,14 @@ class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: TeacherColours.backgroundColor,
       body: SafeArea(
+        
         child: Center(
+          
           child: Column(
             children: [
-              const SizedBox(height: 50),
+              const SizedBox(height: 100),
               //logo
               const Icon(Icons.lock, size: 100, color: Colors.amber),
 
@@ -46,8 +49,8 @@ class LoginPage extends StatelessWidget {
 
               //Welcome back...
               Text(
-                'Welcome back!',
-                style: TextStyle(color: Colors.grey[700], fontSize: 16),
+                'Welcome Back Student!',textAlign: TextAlign.center ,
+                style: TextStyle(color: Colors.grey[700], fontSize: 16,),
               ),
 
               const SizedBox(height: 25),
@@ -117,7 +120,7 @@ class LoginPage extends StatelessWidget {
 
               const SizedBox(height: 25),
               //sign in button
-              myButton(onTap: signStudentIn),
+              myButton(onTap: signStudentIn, color: Colors.green, text: "Sign In"),
 
               //potentially register now?
             ],

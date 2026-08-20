@@ -1,4 +1,7 @@
+import 'package:education_app/utils/teacher_colours.dart';
 import 'package:flutter/material.dart';
+
+// Class for the buttons for school classes
 class ClassButton extends StatelessWidget {
   const ClassButton({
     required this.name,
@@ -11,7 +14,7 @@ class ClassButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.green.shade300,
+      color: TeacherColours.primaryColor,
       borderRadius: BorderRadius.circular(15),
       child: InkWell(
         onTap: onTap,

@@ -1,3 +1,5 @@
+import 'package:education_app/components/app_bar.dart';
+import 'package:education_app/utils/teacher_colours.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -17,11 +19,11 @@ class StudentCredentialsPage extends StatelessWidget {
   Widget build(BuildContext context) {
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Student Accounts'),
-        backgroundColor: Colors.blue,
+      appBar: MyAppBar(
+        title: 'Student Accounts',
+        isStudent: false,
       ),
-
+      backgroundColor: TeacherColours.backgroundColor,
       body: Column(
         children: [
 

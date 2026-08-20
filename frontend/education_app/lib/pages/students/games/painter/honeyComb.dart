@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:education_app/components/hexTile.dart';
+import 'package:education_app/pages/students/games/painter/hexTile.dart';
 import 'package:flutter/material.dart';
 
 class HoneycombGrid extends StatelessWidget {

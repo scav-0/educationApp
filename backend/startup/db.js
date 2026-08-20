@@ -8,9 +8,10 @@ const pool = new Pool({
     connectionString: process.env.DATABASE_URL_OFFLINE,
     
 });
-//ONLINE DATABASE DOESNT WORK ON QUB WIFI
-//process.env.DATABASE_URL
-//process.env.DATABASE_URL_OFFLINE
+/**
+ * Function for connecting to the database, prints connected to db once connections, and connection error otherwise
+ * @returns pool -> the db for future queries
+ */
 export default async function connectToDb() {
     try {
         console.log('attempting to connect...');

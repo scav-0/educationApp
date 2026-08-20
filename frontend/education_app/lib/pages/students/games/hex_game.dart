@@ -1,7 +1,9 @@
 import 'dart:math';
 
+import 'package:education_app/components/app_bar.dart';
 import 'package:education_app/components/my_bottom_nav.dart';
-import 'package:education_app/components/honeyComb.dart';
+import 'package:education_app/models/user.dart';
+import 'package:education_app/pages/students/games/painter/honeyComb.dart';
 import 'package:education_app/utils/game_audio.dart';
 import 'package:education_app/utils/skill_controller.dart';
 import 'package:flutter/material.dart';
@@ -182,9 +184,9 @@ class HexGamePageState extends State<HexGamePage> {
         ),
       ),
       child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Honeycomb Game'),
-          backgroundColor: Colors.amber.shade400,
+        appBar: MyAppBar(
+          title: 'Honeycomb Game',
+          isStudent: true,
           actions: [
             IconButton(
               icon: const Icon(Icons.help_outline),
@@ -194,10 +196,20 @@ class HexGamePageState extends State<HexGamePage> {
                   context: context,
                   builder: (context) {
                     return AlertDialog(
-                      title: const Text('How to Play'),
+                      title: const Text(
+                        'How to Play',
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
                       content: const Text(
-                        'Look at the numbers inside the honeycomb. '
-                        'Select the hexagons that contain honey.',
+                        'Each number tells you how many honey-filled hexagons are next to it.\n'
+                        'Yellow hexagons contain honey, while grey hexagons are empty.\n'
+                        'Can you work out which hexagons contain honey?\n\n'
+                        '(Hint) : Start with the hexagons showing 0!',
+                        style: TextStyle(fontSize: 20),
                       ),
                       actions: [
                         TextButton(

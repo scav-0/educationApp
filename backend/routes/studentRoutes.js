@@ -3,9 +3,71 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { pool } from '../startup/db.js';
 import { authenticateToken } from '../middleware/auth.js';
+import generateUsername from '../utils/createUsername.js';
 
 const router = express.Router();
 
+/**
+ * route for creating a student account -> used by teacher
+ */
+router.post('/create', authenticateToken, async (req, res) => {
+    try {   
+        const teacher_id = req.user;
+        const {
+            first_name,
+            last_name,
+            password,
+            class_id
+        } = req.body;
+
+        //generate username 
+        const client = await pool.connect();
+        const username = await generateUsername(
+                client,
+                first_name,
+                last_name
+            );
+
+        // validation...
+
+        const hashedPassword =
+            await bcrypt.hash(password, 10);
+        
+        const result = await pool.query(
+            `
+            INSERT INTO students
+                (first_name, last_name, username, password, class_id, teacher_id)
+            VALUES
+                ($1, $2, $3, $4, $5, $6)
+            RETURNING id
+            `,
+            [
+                first_name,
+                last_name,
+                username,
+                hashedPassword,
+                class_id ?? null,
+                teacher_id
+            ]
+        );
+
+        res.status(201).json({
+            message: 'Student created successfully',
+            studentId: result.rows[0].id
+        });
+
+    } catch (error) {
+        console.error('Error creating student:', error);
+
+        res.status(500).json({
+            message: 'Server error'
+        });
+    }
+});
+
+/**
+ * Route for student sign in
+ */
 router.post('/sign-in', async (req, res) => {
     try {
         //Take username and password from front end
@@ -23,7 +85,7 @@ router.post('/sign-in', async (req, res) => {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
 
-        //Check password -> if not return error
+        //Check password -> if not correct return error
         const isMatch = await bcrypt.compare(password, student.password);
         if (!isMatch) {
             return res.status(401).json({ message: 'Incorrect Username or Password' });
@@ -44,11 +106,10 @@ router.post('/sign-in', async (req, res) => {
 
 });
 
-router.post(
-    '/:studentId/password',
-    authenticateToken,
-    async (req, res) => {
-
+/**
+ * Route for teacher to change student password
+ */
+router.post('/:studentId/password', authenticateToken, async (req, res) => {
         try {
 
             const teacherId = req.user;
@@ -107,6 +168,53 @@ router.post(
     }
 );
 
+/**Route for getting statistics needed for number of games played per day bar chart
+ * 
+ * */
+router.get('/:studentId/stats/games-per-day', authenticateToken, async (req, res) => {
+        try {
+
+            const { studentId } = req.params;
+            const result = await pool.query(
+                `
+               SELECT
+                dates.date,
+                COUNT(game_stats.id) AS games_played
+                FROM generate_series(
+                CURRENT_DATE - INTERVAL '6 days',
+                CURRENT_DATE,
+                INTERVAL '1 day'
+                ) AS dates(date)
+
+                LEFT JOIN game_stats
+                ON DATE(game_stats.played_at) = dates.date
+                AND game_stats.student_id = $1
+
+                GROUP BY dates.date
+                ORDER BY dates.date ASC
+                `,
+                [studentId]
+            );
+
+            res.status(200).json(result.rows);
+
+        } catch (error) {
+
+            console.error(
+                'Error getting games per day:',
+                error
+            );
+
+            res.status(500).json({
+                message: 'Server error'
+            });
+        }
+    }
+);
+
+/**
+ * Route for changing students class
+ */
 router.post(
     '/:studentId/class',
     authenticateToken,
@@ -228,6 +336,9 @@ router.post(
     }
 );
 
+/**
+ * Route for getting the stats for the p_know graph
+ */
 router.get(
     '/:studentId/stats/:game',
     authenticateToken,
@@ -281,6 +392,9 @@ router.get(
     }
 );
 
+/**
+ * Route for getting the data needed to make the leaderboard
+ */
 router.get('/leaderboard', authenticateToken, async (req, res) => {
     try {
 
@@ -328,10 +442,5 @@ router.get('/leaderboard', authenticateToken, async (req, res) => {
     }
 });
 
-
-
-
-
-//Don't need a sign out post
 
 export default router;

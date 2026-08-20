@@ -1,15 +1,19 @@
+import 'package:education_app/components/app_bar.dart';
 import 'package:education_app/utils/stats_controller.dart';
+import 'package:education_app/utils/teacher_colours.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class StudentEntryPage extends StatefulWidget {
   final String className;
   final int studentCount;
+  final List<Map<String, String>>? importedStudents;
 
   const StudentEntryPage({
     super.key,
     required this.className,
     required this.studentCount,
+    this.importedStudents,
   });
 
   @override
@@ -17,7 +21,6 @@ class StudentEntryPage extends StatefulWidget {
 }
 
 class _StudentEntryPageState extends State<StudentEntryPage> {
-
   late List<TextEditingController> firstNameControllers;
   late List<TextEditingController> lastNameControllers;
 
@@ -34,41 +37,38 @@ class _StudentEntryPageState extends State<StudentEntryPage> {
       widget.studentCount,
       (_) => TextEditingController(),
     );
+
+    if (widget.importedStudents != null) {
+      for (int i = 0; i < widget.importedStudents!.length; i++) {
+        firstNameControllers[i].text =
+            widget.importedStudents![i]['first_name'] ?? '';
+
+        lastNameControllers[i].text =
+            widget.importedStudents![i]['last_name'] ?? '';
+      }
+    }
   }
 
   void createClass() async {
+    final students = <Map<String, String>>[];
 
-  final students = <Map<String, String>>[];
+    for (int i = 0; i < widget.studentCount; i++) {
+      final firstName = firstNameControllers[i].text.trim();
 
-  for (int i = 0; i < widget.studentCount; i++) {
+      final lastName = lastNameControllers[i].text.trim();
 
-    final firstName =
-        firstNameControllers[i].text.trim();
+      if (firstName.isEmpty || lastName.isEmpty) {
+        Get.snackbar('Error', 'Please enter all student names.');
+        return;
+      }
 
-    final lastName =
-        lastNameControllers[i].text.trim();
-
-    if (firstName.isEmpty || lastName.isEmpty) {
-      Get.snackbar(
-        'Error',
-        'Please enter all student names.',
-      );
-      return;
+      students.add({'first_name': firstName, 'last_name': lastName});
     }
 
-    students.add({
-      'first_name': firstName,
-      'last_name': lastName,
-    });
+    final StatsController statsController = Get.find<StatsController>();
+
+    await statsController.createClass(widget.className, students);
   }
-
-  final StatsController statsController = Get.find<StatsController>();
-
-  await statsController.createClass(
-    widget.className,
-    students,
-  );
-}
 
   @override
   void dispose() {
@@ -83,58 +83,42 @@ class _StudentEntryPageState extends State<StudentEntryPage> {
     super.dispose();
   }
 
-    @override
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.className),
-        backgroundColor: Colors.blue,
-      ),
-
+      appBar: MyAppBar(title: widget.className, isStudent: false),
+      backgroundColor: TeacherColours.backgroundColor,
       body: Column(
         children: [
-
           const Padding(
             padding: EdgeInsets.all(20),
             child: Text(
               'Enter Student Names',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
           ),
 
           Expanded(
             child: ListView.builder(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 20,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               itemCount: widget.studentCount,
               itemBuilder: (context, index) {
-
                 return Padding(
-                  padding: const EdgeInsets.only(
-                    bottom: 15,
-                  ),
+                  padding: const EdgeInsets.only(bottom: 15),
 
                   child: Row(
                     children: [
-
                       SizedBox(
                         width: 40,
                         child: Text(
                           '${index + 1}.',
-                          style: const TextStyle(
-                            fontSize: 18,
-                          ),
+                          style: const TextStyle(fontSize: 18),
                         ),
                       ),
 
                       Expanded(
                         child: TextField(
-                          controller:
-                              firstNameControllers[index],
+                          controller: firstNameControllers[index],
                           decoration: const InputDecoration(
                             labelText: 'First name',
                           ),
@@ -145,8 +129,7 @@ class _StudentEntryPageState extends State<StudentEntryPage> {
 
                       Expanded(
                         child: TextField(
-                          controller:
-                              lastNameControllers[index],
+                          controller: lastNameControllers[index],
                           decoration: const InputDecoration(
                             labelText: 'Last name',
                           ),

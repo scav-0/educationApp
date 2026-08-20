@@ -6,6 +6,7 @@ import 'package:education_app/models/user.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+///Class for the authentification page -> when a user sends to the homepage, go here instead to check the validity of their token
 class AuthPage extends StatelessWidget{
   const AuthPage({super.key});
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+///Widgets used for game selection on the student homescreen
 Widget gameCard({
   required String title,
   required Widget icon,

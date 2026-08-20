@@ -12,9 +12,9 @@ export function authenticateToken(req, res, next) {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded.id; // attaches id and username to the request
+    req.user = decoded.id; // adds id for later use!
     next();
   } catch (error) {
-    return res.status(403).json({ message: 'Invalid or expired token' });
+    return res.status(403).json({ message: 'Invalid token' });
   }
 }

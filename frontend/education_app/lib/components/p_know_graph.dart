@@ -29,7 +29,7 @@ Widget buildPKnowGraph() {
 
                 return LineTooltipItem(
                   'Game $game\n'
-                  'P(know): ${pKnow.toStringAsFixed(2)}',
+                  'P(known): ${pKnow.toStringAsFixed(2)}',
                   const TextStyle(fontSize: 14),
                 );
               }).toList();
@@ -39,7 +39,7 @@ Widget buildPKnowGraph() {
 
         titlesData: FlTitlesData(
           leftTitles: AxisTitles(
-            axisNameWidget: const Text('P(know)'),
+            axisNameWidget: const Text('P(known)'),
             axisNameSize: 30,
 
             sideTitles: SideTitles(

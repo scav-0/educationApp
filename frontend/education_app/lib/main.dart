@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
       home: AuthPage(),
       theme: ThemeData(
         primarySwatch: Colors.blue,
-        scaffoldBackgroundColor: Colors.amber[100],
+        scaffoldBackgroundColor: Colors.grey.shade200,
         
       ),
     );

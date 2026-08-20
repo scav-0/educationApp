@@ -20,3 +20,20 @@ class SkillPoint {
     );
   }
 }
+
+class GamesPerDay {
+  final DateTime date;
+  final int games;
+
+  GamesPerDay({
+    required this.date,
+    required this.games,
+  });
+
+  factory GamesPerDay.fromJson(Map<String, dynamic> json) {
+    return GamesPerDay(
+      date: DateTime.parse(json['date']),
+      games: int.parse(json['games_played'].toString()),
+    );
+  }
+}

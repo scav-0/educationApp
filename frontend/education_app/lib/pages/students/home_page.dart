@@ -1,4 +1,4 @@
-import 'package:education_app/pages/students/auth_page.dart';
+import 'package:education_app/components/app_bar.dart';
 import 'package:education_app/pages/students/games/bracelet_game.dart';
 import 'package:education_app/components/my_bottom_nav.dart';
 import 'package:education_app/pages/students/games/hex_game.dart';
@@ -25,25 +25,7 @@ class HomePage extends StatelessWidget {
     Get.to(() => HexGamePage());
   }
 
-  void game4() {}
-
-  void logout() async {
-    final result = await authController.signOut();
-
-    if (result == 'success') {
-      authController.isSignedIn.value =
-          false; //Why doesnt it work without this?
-      Get.snackbar(
-        'Signed Out Successfully!',
-        "",
-        snackPosition: SnackPosition.BOTTOM,
-      );
-      Get.to(() => AuthPage());
-    } else {
-      Get.snackbar('Error', result, snackPosition: SnackPosition.BOTTOM);
-    }
-  }
-
+    
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -55,15 +37,7 @@ class HomePage extends StatelessWidget {
       ),
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        appBar: AppBar(
-          backgroundColor: Colors.amber.shade400,
-
-          title: Text("Home"),
-          actions: [
-            //logout button
-            IconButton(onPressed: logout, icon: Icon(Icons.logout)),
-          ],
-        ),
+        appBar: MyAppBar(title: "Home",isStudent: true,),
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -90,7 +64,7 @@ class HomePage extends StatelessWidget {
                     height: 80,
                     child: Image.asset('icons/beads.png', color: Colors.white),
                   ),
-                  color: Colors.red,
+                  color: Colors.green,
                   onTap: braceletGame,
                 ),
 
@@ -110,7 +84,7 @@ class HomePage extends StatelessWidget {
                 gameCard(
                   title: "Password",
                   icon: Icon(Icons.abc_outlined, size: 80, color: Colors.white),
-                  color: Colors.pink.shade300,
+                  color: Colors.red,
                   onTap: symbolGame,
                 ),
 

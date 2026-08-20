@@ -61,14 +61,12 @@ class AuthController extends GetxController {
 
   Future<String> teacherSignIn(String email, String password) async {
     try {
-      
       var signInData = await http.post(
         teacherSignInUrl,
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': email.trim(), 'password': password.trim()}),
       );
       if (signInData.statusCode == 200) {
-        
         final jsonSignInData = jsonDecode(signInData.body);
 
         isSignedIn.value = true;
@@ -91,12 +89,9 @@ class AuthController extends GetxController {
         );
         return 'success';
       } else {
-        
         return jsonDecode(signInData.body)['message'].toString();
       }
     } catch (error) {
-      
-      
       return '$error';
     }
   }
@@ -146,6 +141,45 @@ class AuthController extends GetxController {
     }
   }
 
+  Future<String> createStudent(
+  String firstName,
+  String lastName,
+  String password,
+  int? classId,
+) async {
+  try {
+    final token = await storage.read(key: 'token');
+
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/students/create'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({
+        'first_name': firstName,
+        'last_name': lastName,
+        'password': password,
+        'class_id': classId,
+      }),
+    );
+
+    if (response.statusCode == 201) {
+      return 'success';
+    }
+
+    final data = jsonDecode(response.body);
+    print(data['message']);
+    return data['message'] ?? 'Failed to create student';
+
+  } catch (e, stackTrace) {
+    print('Error creating student: $e');
+  print(stackTrace);
+
+  return 'Unable to connect to server';
+  }
+}
+
   Future<String> signOut() async {
     try {
       isSignedIn.value = false;
@@ -155,6 +189,40 @@ class AuthController extends GetxController {
       return 'success';
     } catch (error) {
       return '$error';
+    }
+  }
+
+  Future<String> createTeacherAccount(
+    String firstName,
+    String lastName,
+    String email,
+    String password,
+  ) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/api/teachers/register'),
+
+        headers: {'Content-Type': 'application/json'},
+
+        body: jsonEncode({
+          'firstName': firstName,
+          'lastName': lastName,
+          'email': email,
+          'password': password,
+        }),
+      );
+
+      if (response.statusCode == 201) {
+        return "success";
+      }
+
+      final data = jsonDecode(response.body);
+
+      return data['message'] ?? 'Failed to create account';
+    } catch (e) {
+      print('Error creating teacher account: $e');
+
+      return 'Unable to connect to the server';
     }
   }
 }

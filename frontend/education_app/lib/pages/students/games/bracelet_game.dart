@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:education_app/components/app_bar.dart';
 import 'package:education_app/components/multipleChoice.dart';
 import 'package:education_app/pages/students/games/painter/circularBraceletPainter.dart';
 import 'package:education_app/components/my_bottom_nav.dart';
@@ -201,9 +202,9 @@ class BraceletGamePageState extends State<BraceletGamePage> {
         ),
       ),
       child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Bracelet Game'),
-          backgroundColor: Colors.amber.shade400,
+        appBar: MyAppBar(
+          title: 'Bracelet Game',
+          isStudent: true,
           actions: [
             IconButton(
               icon: const Icon(Icons.help_outline),
@@ -213,12 +214,12 @@ class BraceletGamePageState extends State<BraceletGamePage> {
                   context: context,
                   builder: (context) {
                     return AlertDialog(
-                      title: const Text('How to Play'),
+                      title: const Text('How to Play', style: TextStyle(fontSize: 22, fontWeight:  FontWeight.bold, decoration: TextDecoration.underline)),
                       content: const Text(
-                        'Compare the circular bracelet above '
-                        'with the four bracelets below. '
-                        'Select the bracelet that has the '
-                        'same colour pattern.',
+                        'The bracelet at the top has been opened and laid out in a straight line.\n'
+                        'Choose the bracelet below with the same bead colour pattern!'
+                        '\n\nHint: Look at the order of the colours!',
+                        style: TextStyle(fontSize: 20),
                       ),
                       actions: [
                         TextButton(
