@@ -116,7 +116,7 @@ class ClassPageState extends State<ClassPage> {
   );
 }
 
-void showStudentCountDialog(String className) {
+void showStudentCountDialog(String className) async {
   final studentCountController =
       TextEditingController();
 
@@ -139,12 +139,12 @@ void showStudentCountDialog(String className) {
         ),
 
         ElevatedButton(
-          onPressed: () {
+          onPressed: () async {
             final count = int.tryParse(
               studentCountController.text.trim(),
             );
 
-            if (count == null || count <= 0) {
+            if (count == null || count < 0) {
               Get.snackbar(
                 'Error',
                 'Please enter a valid number of students.',
@@ -153,13 +153,15 @@ void showStudentCountDialog(String className) {
             }
 
             Get.back();
-
+            if(count==0){
+              await statsController.createClass(className, []);
+            }else{
             Get.to(
               () => StudentEntryPage(
                 className: className,
                 studentCount: count,
               ),
-            );
+            );}
           },
           child: const Text('Next'),
         ),

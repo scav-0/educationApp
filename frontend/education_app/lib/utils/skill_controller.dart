@@ -1,5 +1,4 @@
 import 'package:education_app/utils/dependencies.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -26,20 +25,19 @@ class SkillController extends GetxController {
         await authController.checkAuthStatus();
       }
 
+      final token = authController.token.value;
+
       final response = await http.get(
         Uri.parse('$baseUrl/api/skills/fetch'),
-        headers: {
-          'Authorization':
-              'Bearer ${await authController.storage.read(key: 'token') ?? ''}',
-        }, //needs american spelling
+        headers: {'Authorization': 'Bearer $token'},
       );
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         braceletPknow.value = data['bracelet'];
         symbolPknow.value = data['symbol'];
         honeycombPknow.value = data['honeycomb'];
-      }else{
-        // print(response.statusCode);
+      } else {
+        print("FEtch skills failed" + response.statusCode.toString());
       }
     } catch (e) {
       print('Error fetching skills: $e');
@@ -49,13 +47,18 @@ class SkillController extends GetxController {
   Future<void> updateSkill(String game, bool correct) async {
     //Need to send game, and if its is correct or not alongside student id, (maybe current pknow also)
     try {
-      // print("Updating skills");
+      print("Updating skills");
+      if (authController.token.value.isEmpty) {
+        await authController.checkAuthStatus();
+      }
+
+      final token = authController.token.value;
       final response = await http.post(
         Uri.parse('$baseUrl/api/skills/update'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization':
-              'Bearer ${await authController.storage.read(key: 'token') ?? ''}',
+              'Bearer $token',
         },
         body: jsonEncode({'game': game, 'correct': correct}),
       );
@@ -77,32 +80,38 @@ class SkillController extends GetxController {
             break;
           //UPDATE WHEN A NEW GAME IS ADDED
         }
-      }else{
-          // print(response.statusCode);
-        }
+      } else {
+        // print(response.statusCode);
+      }
     } catch (e) {
       print('Error updating skill: $e');
     }
   }
 
-  Future<void> saveStats(String game, bool correct, int attempts, int timeTaken, double pKnow) async {
-  try {
-    await http.post(
-      Uri.parse('$baseUrl/api/skills/stats'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ${authController.token.value}',
-      },
-      body: jsonEncode({
-        'game': game,
-        'correct': correct,
-        'attempts': attempts,
-        'time_taken': timeTaken,
-        'p_know': pKnow,
-      }),
-    );
-  } catch (e) {
-    print('Error saving stats: $e');
+  Future<void> saveStats(
+    String game,
+    bool correct,
+    int attempts,
+    int timeTaken,
+    double pKnow,
+  ) async {
+    try {
+      await http.post(
+        Uri.parse('$baseUrl/api/skills/stats'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${authController.token.value}',
+        },
+        body: jsonEncode({
+          'game': game,
+          'correct': correct,
+          'attempts': attempts,
+          'time_taken': timeTaken,
+          'p_know': pKnow,
+        }),
+      );
+    } catch (e) {
+      print('Error saving stats: $e');
+    }
   }
-}
 }

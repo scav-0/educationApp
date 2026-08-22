@@ -82,14 +82,17 @@ class _StudentsPageState extends State<StudentsPage> {
   @override
   void initState() {
     super.initState();
-
+    WidgetsBinding.instance.addPostFrameCallback((_) { // TO BUILD BEFORE API CALL, STOPS ERROR
     if (widget.classId == null) {
       // All students for teacher
       statsController.getStudents();
+      
     } else {
       // Students in specific class
       statsController.getStudentsFromClass(widget.classId!);
+      
     }
+    });
   }
 
   @override

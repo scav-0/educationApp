@@ -262,7 +262,7 @@ class BraceletGamePageState extends State<BraceletGamePage> {
                   child: Column(
                     children: [
                       const Text(
-                        'Which bracelet is the same?',
+                        'Choose the matching bracelet!',
                         textAlign: TextAlign.center,
                         style: TextStyle(fontSize: 19),
                       ),

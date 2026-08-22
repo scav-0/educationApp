@@ -204,13 +204,48 @@ class HexGamePageState extends State<HexGamePage> {
                           decoration: TextDecoration.underline,
                         ),
                       ),
-                      content: const Text(
-                        'Each number tells you how many honey-filled hexagons are next to it.\n'
-                        'Yellow hexagons contain honey, while grey hexagons are empty.\n'
-                        'Can you work out which hexagons contain honey?\n\n'
-                        '(Hint) : Start with the hexagons showing 0!',
-                        style: TextStyle(fontSize: 20),
+
+                      content: SingleChildScrollView(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Text(
+                              'Each number tells you how many '
+                              'nearby hexagons contain honey.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(fontSize: 20),
+                            ),
+
+                            const SizedBox(height: 15),
+
+                            Image.asset(
+                              'assets/images/HoneyCombExample.png',
+                              width: 250,
+                            ),
+
+                            const SizedBox(height: 15),
+
+                            const Text(
+                              'Yellow hexagons contain honey, while grey '
+                              'hexagons are empty.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(fontSize: 20),
+                            ),
+
+                            const SizedBox(height: 15),
+
+                            const Text(
+                              '(Hint): Start with the hexagons showing 0!',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
+
                       actions: [
                         TextButton(
                           onPressed: () {
@@ -271,7 +306,7 @@ class HexGamePageState extends State<HexGamePage> {
                 const SizedBox(height: 24),
                 ElevatedButton(
                   onPressed: onSubmit,
-                  child: const Text('Submit'),
+                  child: const Text('Done!'),
                 ),
               ],
             ),

@@ -3,7 +3,7 @@
  * @param {database client} client 
  * @param {String first name of student} firstName 
  * @param {String last name of student} lastName 
- * @returns 
+ * @returns firstName.lastName + integer if username is taken
  */
 export default async function generateUsername(client, firstName, lastName) {
     const baseUsername =

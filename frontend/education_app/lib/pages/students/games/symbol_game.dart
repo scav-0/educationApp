@@ -292,7 +292,7 @@ class SymbolGamePageState extends State<SymbolGamePage> {
       ),
       child: Scaffold(
         appBar: MyAppBar(
-          title: 'Symbol Game',
+          title: 'Password Game',
           isStudent: true,
           actions: [
             IconButton(

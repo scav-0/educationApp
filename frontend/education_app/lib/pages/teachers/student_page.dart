@@ -2,6 +2,7 @@ import 'package:education_app/components/app_bar.dart';
 import 'package:education_app/components/games_played.dart';
 import 'package:education_app/components/p_know_graph.dart';
 import 'package:education_app/components/stat_card.dart';
+import 'package:education_app/utils/dependencies.dart';
 import 'package:education_app/utils/screen_size.dart';
 import 'package:education_app/utils/stats_controller.dart';
 import 'package:education_app/models/user.dart';
@@ -25,14 +26,18 @@ class StudentStatsPage extends StatefulWidget {
 class StudentStatsState extends State<StudentStatsPage> {
   String selectedGame = 'Overall Stats';
   StatsController statsController = Get.find<StatsController>();
+  AuthController authController = Get.find<AuthController>();
 
   @override
-  void initState() {
-    loadStats();
-    statsController.skillHistory.clear();
+  @override
+void initState() {
+  super.initState();
 
-    super.initState();
-  }
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    statsController.skillHistory.clear();
+    loadStats();
+  });
+}
 
   void loadStats() {
     if (selectedGame == 'Overall Stats') {
@@ -418,7 +423,7 @@ class StudentStatsState extends State<StudentStatsPage> {
               ),
 
               onPressed: () async {
-                final success = await statsController.deleteStudent(
+                final success = await authController.deleteStudent(
                   widget.student.id,
                 );
 

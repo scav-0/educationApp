@@ -1,4 +1,5 @@
 import 'package:education_app/models/skill_point.dart';
+import 'package:education_app/pages/teachers/class_page.dart';
 import 'package:education_app/pages/teachers/student_cred.dart';
 import 'package:education_app/models/class.dart';
 import 'package:education_app/utils/dependencies.dart';
@@ -12,8 +13,6 @@ import 'base_url.dart';
 class StatsController extends GetxController {
   final AuthController authController = Get.find<AuthController>();
 
-  
-
   final RxList<SchoolClass> classes = <SchoolClass>[].obs;
 
   final RxList<Student> students = <Student>[].obs;
@@ -23,6 +22,8 @@ class StatsController extends GetxController {
   RxList<Map<String, dynamic>> leaderboard = <Map<String, dynamic>>[].obs;
 
   RxList<GamesPerDay> gamesPerDay = <GamesPerDay>[].obs;
+
+  RxMap<String, dynamic> studentSummary = <String, dynamic>{}.obs;
   
   Future<void> getGamesPerDay(int studentId) async {
   try {
@@ -225,6 +226,11 @@ class StatsController extends GetxController {
         // Refresh classes
         await getClasses();
 
+        if(students.isEmpty){
+          Get.to(ClassPage());
+
+        }else{
+
         // Show credentials
         Get.to(
           () => StudentCredentialsPage(
@@ -232,6 +238,7 @@ class StatsController extends GetxController {
             students: List<Map<String, dynamic>>.from(data['students']),
           ),
         );
+        }
       } else {
         final data = jsonDecode(response.body);
 
@@ -314,13 +321,7 @@ class StatsController extends GetxController {
         },
       );
 
-      // print(
-      //   'Stats status: ${response.statusCode}',
-      // );
-
-      // print(
-      //   'Stats body: ${response.body}',
-      // );
+      
 
       if (response.statusCode == 200) {
         final List data = jsonDecode(response.body);
@@ -334,15 +335,14 @@ class StatsController extends GetxController {
     }
   }
 
-  RxMap<String, dynamic> studentSummary =
-    <String, dynamic>{}.obs;
+  
 
   Future<void> getStudentSummary(
-    
   int studentId,
   String? game,
 ) async {
   try {
+    
     studentSummary.clear();
     final token =
         await authController.storage.read(key: 'token');
@@ -377,37 +377,7 @@ class StatsController extends GetxController {
     print('Error getting student summary: $e');
   }
 }
+  
 
-  Future<bool> deleteStudent(int studentId) async {
-    try {
-      final token = await authController.storage.read(key: 'token');
-
-      final response = await http.post(
-        Uri.parse('$baseUrl/api/students/$studentId/delete'),
-
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      );
-
-      print(
-        'Delete student status: '
-        '${response.statusCode}',
-      );
-
-      print(
-        'Delete student body: '
-        '${response.body}',
-      );
-
-      return response.statusCode == 200;
-    } catch (e) {
-      print('Error deleting student: $e');
-
-      return false;
-    }
-  }
-
-  Future<Object?> createStudent(String firstName, String lastName, String username, String password, int? classId) async {}
+  
 }

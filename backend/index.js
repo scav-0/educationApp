@@ -1,5 +1,5 @@
 import express from 'express';
-import db from './startup/db.js';
+import db from './config/db.js';
 import studentRoutes from './routes/studentRoutes.js';
 import skillRoutes from './routes/skillRoutes.js';
 import teacherRoutes from './routes/teacherRoutes.js';
@@ -9,7 +9,7 @@ import cors from 'cors';
 
 const app = express();
 app.use(cors({
-  origin: '*', // allow all origins for development
+  origin: '*', 
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));

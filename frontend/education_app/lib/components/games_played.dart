@@ -98,7 +98,7 @@ Widget gamesPlayedChart() {
                   sideTitles: SideTitles(
                     showTitles: true,
                     reservedSize: 35,
-                    interval: 1,
+                    interval: 5,
                   ),
                 ),
 

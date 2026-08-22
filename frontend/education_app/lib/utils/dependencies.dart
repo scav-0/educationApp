@@ -5,17 +5,25 @@ import 'dart:convert';
 import 'base_url.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+///Auth controller class for communication with the API for authentification
 class AuthController extends GetxController {
   final storage = FlutterSecureStorage();
   final studentSignInUrl = Uri.parse('$baseUrl/api/students/sign-in');
   final teacherSignInUrl = Uri.parse('$baseUrl/api/teachers/sign-in');
 
+  RxBool isSignedIn = false.obs;
+  RxString token = ''.obs;
+  Rxn<User> currentUser = Rxn<User>();
+
+  ///Method for when initialised
   @override
   void onInit() {
     super.onInit();
     checkAuthStatus();
+    
   }
 
+  ///Method for checking authentification status -> is the user signed in
   Future<void> checkAuthStatus() async {
     final savedToken = await storage.read(key: 'token');
     if (savedToken != null) {
@@ -24,6 +32,7 @@ class AuthController extends GetxController {
 
       final role = await storage.read(key: 'role');
 
+      ///Save data to current user depending on role
       if (role == 'student') {
         currentUser.value = Student(
           id: int.parse(await storage.read(key: 'id') ?? '0'),
@@ -39,26 +48,12 @@ class AuthController extends GetxController {
           email: await storage.read(key: 'email') ?? '',
         );
       }
-
-      // final idString = await storage.read(key: 'id') ?? '0';//needs to be parsed since it returns a string!
-      // signedInId.value = int.parse(idString);
-      // signedInUsername.value = await storage.read(key: 'username') ?? '';
-      // signedInFirstName.value = await storage.read(key: 'first_name') ?? '';
-      // signedInLastName.value = await storage.read(key: 'last_name') ?? '';
     } else {
       isSignedIn.value = false;
     }
   }
 
-  RxBool isSignedIn = false.obs;
-  RxString token = ''.obs;
-  // RxString signedInUsername = ''.obs;
-  // RxString signedInFirstName = ''.obs;
-  // RxString signedInLastName = ''.obs;
-  // RxInt signedInId = 0.obs;
-
-  Rxn<User> currentUser = Rxn<User>();
-
+  ///Method for signing teacher in
   Future<String> teacherSignIn(String email, String password) async {
     try {
       var signInData = await http.post(
@@ -75,7 +70,6 @@ class AuthController extends GetxController {
         currentUser.value = Teacher.fromJson(jsonSignInData);
 
         await storage.write(key: 'token', value: jsonSignInData['token']);
-
         await storage.write(key: 'role', value: 'teacher');
         await storage.write(key: 'id', value: jsonSignInData['id'].toString());
         await storage.write(key: 'email', value: jsonSignInData['email']);
@@ -96,6 +90,7 @@ class AuthController extends GetxController {
     }
   }
 
+  ///Method for signing student in
   Future<String> signIn(String username, String password) async {
     try {
       var signInData = await http.post(
@@ -114,13 +109,8 @@ class AuthController extends GetxController {
         token.value = jsonSignInData['token'];
 
         currentUser.value = Student.fromJson(jsonSignInData);
-        // signedInId.value = jsonSignInData['id'];
-        // signedInUsername.value = jsonSignInData['username'];
-        // signedInFirstName.value = jsonSignInData['first_name'];
-        // signedInLastName.value = jsonSignInData['last_name'];
 
         await storage.write(key: 'token', value: jsonSignInData['token']);
-
         await storage.write(key: 'role', value: 'student');
         await storage.write(key: 'id', value: jsonSignInData['id'].toString());
         await storage.write(key: 'username', value: jsonSignInData['username']);
@@ -141,57 +131,56 @@ class AuthController extends GetxController {
     }
   }
 
+  ///Method for creating student account
   Future<String> createStudent(
-  String firstName,
-  String lastName,
-  String password,
-  int? classId,
-) async {
-  try {
-    final token = await storage.read(key: 'token');
+    String firstName,
+    String lastName,
+    String password,
+    int? classId,
+  ) async {
+    try {
+      final token = await storage.read(key: 'token');
 
-    final response = await http.post(
-      Uri.parse('$baseUrl/api/students/create'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-      body: jsonEncode({
-        'first_name': firstName,
-        'last_name': lastName,
-        'password': password,
-        'class_id': classId,
-      }),
-    );
+      final response = await http.post(
+        Uri.parse('$baseUrl/api/students/create'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'first_name': firstName,
+          'last_name': lastName,
+          'password': password,
+          'class_id': classId,
+        }),
+      );
 
-    if (response.statusCode == 201) {
-      return 'success';
+      if (response.statusCode == 201) {
+        return 'success';
+      }
+
+      final data = jsonDecode(response.body);
+      return data['message'] ?? 'Failed to create student';
+    } catch (e, stackTrace) {
+      print('Error creating student: $e');
+      return 'Unable to connect to server';
     }
-
-    final data = jsonDecode(response.body);
-    print(data['message']);
-    return data['message'] ?? 'Failed to create student';
-
-  } catch (e, stackTrace) {
-    print('Error creating student: $e');
-  print(stackTrace);
-
-  return 'Unable to connect to server';
   }
-}
 
+  //Method for signing a user out
   Future<String> signOut() async {
     try {
       isSignedIn.value = false;
-      token.value = '';
-      currentUser.value = null;
-      await storage.deleteAll();
+      token.value = ''; //clear token
+      currentUser.value = null; 
+      await storage.deleteAll(); //clear storage
       return 'success';
     } catch (error) {
       return '$error';
     }
   }
 
+  ///Method for creating a teacher account
   Future<String> createTeacherAccount(
     String firstName,
     String lastName,
@@ -223,6 +212,38 @@ class AuthController extends GetxController {
       print('Error creating teacher account: $e');
 
       return 'Unable to connect to the server';
+    }
+  }
+
+  ///Method for deleting a student account
+  Future<bool> deleteStudent(int studentId) async {
+    try {
+      final token = await storage.read(key: 'token');
+
+      final response = await http.post(
+        Uri.parse('$baseUrl/api/students/$studentId/delete'),
+
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      print(
+        'Delete student status: '
+        '${response.statusCode}',
+      );
+
+      print(
+        'Delete student body: '
+        '${response.body}',
+      );
+
+      return response.statusCode == 200;
+    } catch (e) {
+      print('Error deleting student: $e');
+
+      return false;
     }
   }
 }

@@ -1,5 +1,6 @@
 import 'package:audioplayers/audioplayers.dart';
 
+///Game audio class for playing sounds
 class GameAudio {
   static final AudioPlayer _player = AudioPlayer();
 

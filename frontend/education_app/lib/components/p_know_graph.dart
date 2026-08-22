@@ -73,7 +73,7 @@ Widget buildPKnowGraph() {
               showTitles: true,
               reservedSize: 40,
 
-              interval: 1,
+              interval: 5,
 
               getTitlesWidget: (value, meta) {
                 final attempt = value.toInt();

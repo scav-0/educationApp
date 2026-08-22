@@ -1,7 +1,7 @@
 import express from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { pool } from '../startup/db.js';
+import { pool } from '../config/db.js';
 import { authenticateToken } from '../middleware/auth.js';
 
 
@@ -80,8 +80,8 @@ router.post('/sign-in', async (req, res) => {
     try {
 
         const { email, password } = req.body;
-        // console.log(email);
-        //Find teacher with that username
+        
+        //Find teacher with that email
         const result = await pool.query(
             'SELECT * FROM teachers where email = $1',
             [email]

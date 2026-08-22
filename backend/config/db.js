@@ -10,7 +10,7 @@ const pool = new Pool({
 });
 /**
  * Function for connecting to the database, prints connected to db once connections, and connection error otherwise
- * @returns pool -> the db for future queries
+ * @returns pool for future queries
  */
 export default async function connectToDb() {
     try {
@@ -25,6 +25,9 @@ export default async function connectToDb() {
     }
 }
 
+/**
+ * Method for printing pool errors to console
+ */
 pool.on('error', (err) => {
   console.log('pool error:', err.message);
 });

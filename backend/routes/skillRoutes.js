@@ -1,6 +1,6 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
-import { pool } from '../startup/db.js';
+import { pool } from '../config/db.js';
 import { authenticateToken } from '../middleware/auth.js';
 import PKnownNext from '../utils/bayesian.js';
 
@@ -15,7 +15,8 @@ const defaultPknow = 0.3;//sets default value for pKnow for later
 router.get('/fetch', authenticateToken, async (req, res) => {
     try {
         
-        const { studentId } = req.user;
+        const studentId  = req.user;
+        // console.log(studentId);
 
               
         let result = await pool.query(
@@ -60,6 +61,11 @@ router.post('/update', authenticateToken, async (req, res) => {
         const {  game, correct } = req.body;
 
         
+        if(student_id == null){
+            res.status(400).json({
+            message: 'id == null'
+        });
+        }
         const skillResult = await pool.query(
             `SELECT p_know
              FROM student_skills

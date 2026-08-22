@@ -89,16 +89,7 @@ class LoginPage extends StatelessWidget {
                           horizontal: screenWidth(context) * 0.05,
                         ),
 
-                        // child: Align(
-                        //   alignment: Alignment.centerRight,
-                        //   // child: Padding(
-                        //   //   padding: const EdgeInsets.only(right: 8),
-                        //   //   child: Text(
-                        //   //     'Forgot Password?',
-                        //   //     style: TextStyle(color: Colors.black),
-                        //   //   ),
-                        //   // ),
-                        // ),
+                        
                         child: Align(
                           alignment: Alignment.centerRight,
                           child: GestureDetector(

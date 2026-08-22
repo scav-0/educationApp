@@ -1,10 +1,12 @@
-import 'dart:async';
 import 'dart:collection';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 
+///Method to map integers (from 1-6) to unique colours
+///Anything outside of that range is mapped to purple
+///Returned list of type Color
 List<Color> toBeadColours(List<int> colours) {
   return colours.map((c) {
     switch (c) {
@@ -28,6 +30,9 @@ List<Color> toBeadColours(List<int> colours) {
 
 final double beadRadius = 16;
 
+///Method for swaping elements of an array
+///Element at index a will be swapped to element of index b
+///returns array with swapped elements
 List<int> swap(List<int> array, int a, int b) {
   int temp = array[a];
   array[a] = array[b];
@@ -35,10 +40,13 @@ List<int> swap(List<int> array, int a, int b) {
   return array;
 }
 
+
+//Method for creating incorrect choices for bracelet multiple choices
 List<List<int>> createWrongAnswers(List<int> colours, double p) {
   List<List<int>> list = [];
   List<int> scrambled = List.from(colours);
   final rng = Random();
+
   //if easier add more random colours, if harder just swap, more swaps for easier etc
   int randoms = 1;
   if (p < 0.5) {
@@ -48,6 +56,7 @@ List<List<int>> createWrongAnswers(List<int> colours, double p) {
   if (p < 0.75) {
     swaps = 3;
   }
+
   int attempts = 0;
   int innerAttempts = 0;
   do {
@@ -110,6 +119,8 @@ List<List<int>> createWrongAnswers(List<int> colours, double p) {
   return list;
 }
 
+///Method for checking is two integer lists (bracelets) are the same circular sequence
+///example to make sure you dont have 1234 and 2341
 bool isSameCircularSequence(List<int> a, List<int> b) {
   if (a.length != b.length) return false;
 

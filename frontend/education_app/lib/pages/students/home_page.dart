@@ -25,7 +25,6 @@ class HomePage extends StatelessWidget {
     Get.to(() => HexGamePage());
   }
 
-    
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -35,24 +34,24 @@ class HomePage extends StatelessWidget {
           repeat: ImageRepeat.repeat,
         ),
       ),
+
+
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        appBar: MyAppBar(title: "Home",isStudent: true,),
+        appBar: MyAppBar(title: "Home", isStudent: true),
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+
             const SizedBox(height: 50),
+
             Center(
-              
               child: Text(
                 "Welcome back ${authController.currentUser.value?.firstName}!",
-                style:  TextStyle(
-                  
-                  fontSize: 20,
-                  fontWeight: FontWeight.w500,
-                ),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
               ),
             ),
+
             const SizedBox(height: 50),
 
             Row(
@@ -69,18 +68,27 @@ class HomePage extends StatelessWidget {
                 ),
 
                 const SizedBox(width: 50),
+
                 gameCard(
                   title: "Honeycomb",
-                  icon: Icon(Icons.hexagon_outlined, size: 80, color: Colors.white),
+                  icon: Icon(
+                    Icons.hexagon_outlined,
+                    size: 80,
+                    color: Colors.white,
+                  ),
                   color: Colors.yellow.shade800,
                   onTap: hexGame,
                 ),
+
               ],
             ),
+
             const SizedBox(height: 50),
+
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+
                 gameCard(
                   title: "Password",
                   icon: Icon(Icons.abc_outlined, size: 80, color: Colors.white),
@@ -88,8 +96,6 @@ class HomePage extends StatelessWidget {
                   onTap: symbolGame,
                 ),
 
-                // const SizedBox(width: 50),
-                // gameCard(title: "Game4", icon: Icons.access_alarm, color: Colors.yellow, onTap: game4),
               ],
             ),
           ],

@@ -1,7 +1,7 @@
 import express from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { pool } from '../startup/db.js';
+import { pool } from '../config/db.js';
 import { authenticateToken } from '../middleware/auth.js';
 import generateUsername from '../utils/createUsername.js';
 
@@ -226,8 +226,7 @@ router.post(
             const { studentId } = req.params;
             const { classId } = req.body;
 
-            // Make sure the class belongs
-            // to this teacher
+            // Make sure the class belongs to this teacher
             const classResult = await pool.query(
                 `SELECT id
                  FROM classes
@@ -242,8 +241,7 @@ router.post(
                 });
             }
 
-            // Make sure the student belongs
-            // to this teacher
+            // Make sure the student belongs to this teacher
             const studentResult = await pool.query(
                 `SELECT id
                  FROM students
@@ -290,12 +288,11 @@ router.post(
     async (req, res) => {
 
         try {
-            // POST GRE HAS CASCADE TO DELETE ASSOCIATED FILES SUCH AS GAME STATS
+            
             const teacherId = req.user;
             const { studentId } = req.params;
 
-            // Make absolutely sure this student
-            // belongs to the logged-in teacher
+            // Make sure this student belongs to the logged-in teacher
             const studentResult = await pool.query(
                 `SELECT id
                  FROM students
